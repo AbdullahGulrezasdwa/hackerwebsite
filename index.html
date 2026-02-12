@@ -2,125 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Enterprise Security Console - Node_AD_09</title>
+    <title>ARCHANGEL // Incident Response v4.0.1</title>
     <style>
         :root {
-            --bg: #002b36; --text: #839496; --highlight: #268bd2;
-            --warn: #cb4b16; --success: #859900; --sidebar-bg: #073642;
+            --bg: #0b0e14; --side: #151921; --border: #2d333b;
+            --text: #adbac7; --accent: #539bf5; --danger: #e5534b; --success: #57ab5a;
         }
-        * { box-sizing: border-box; font-family: 'Segoe UI', 'Ubuntu Mono', monospace; }
-        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        * { box-sizing: border-box; cursor: default; }
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            margin: 0; display: flex; height: 100vh; overflow: hidden; 
+        }
 
-        /* Sidebar: Professional System Stats */
-        #nav { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #586e75; display: flex; flex-direction: column; padding: 20px; }
-        .header { font-size: 12px; font-weight: bold; color: var(--highlight); margin-bottom: 20px; letter-spacing: 1px; }
-        .data-point { margin-bottom: 15px; font-size: 13px; border-bottom: 1px solid rgba(131, 148, 150, 0.1); padding-bottom: 5px; }
-        .label { display: block; font-size: 10px; color: #586e75; text-transform: uppercase; }
-
-        /* Main Workspace */
-        #workspace { flex: 1; display: flex; flex-direction: column; background: #001f27; }
-        #toolbar { height: 40px; background: #073642; border-bottom: 1px solid #586e75; display: flex; align-items: center; padding: 0 20px; font-size: 12px; gap: 20px; }
+        /* Tactical Sidebar */
+        #sidebar { width: 360px; background: var(--side); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 100; }
+        .module { background: #0b0e14; border: 1px solid var(--border); border-radius: 4px; padding: 12px; margin-bottom: 15px; }
+        .label { font-size: 9px; color: #768390; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
         
-        /* The "Hacker" Typer Area */
-        #terminal-wrapper { flex: 1; padding: 20px; overflow-y: hidden; position: relative; }
-        #terminal { white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; color: #93a1a1; }
+        /* Main Grid Layout */
+        #main { flex: 1; display: grid; grid-template-rows: 40px 1fr 220px; background: #0d1117; }
+        #top-bar { border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; font-size: 11px; gap: 25px; background: var(--side); }
         
-        /* Bottom Activity Log */
-        #activity-log { height: 200px; border-top: 1px solid #586e75; background: var(--sidebar-bg); padding: 15px; overflow: hidden; font-size: 11px; }
-        .log-entry { margin-bottom: 4px; border-left: 2px solid var(--highlight); padding-left: 8px; }
+        /* High-Density Trace Console */
+        #console-area { padding: 25px; overflow-y: hidden; position: relative; background: #040507; }
+        #console { font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.6; color: #cdd9e5; }
 
-        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--highlight); animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* Real-Time Entropy/Memory Map */
+        #bottom-panel { border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 350px; background: var(--side); }
+        #memory-dump { padding: 15px; font-family: monospace; font-size: 11px; color: #444c56; overflow: hidden; line-height: 1.3; }
+        #packet-sniffer { border-left: 1px solid var(--border); padding: 15px; font-size: 10px; color: var(--success); overflow: hidden; }
+
+        /* Believability Animations */
+        .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .typing-line { border-left: 2px solid var(--accent); padding-left: 10px; margin-bottom: 4px; }
     </style>
 </head>
-<body onkeydown="handleInput(event)">
+<body onkeydown="processInput(event)">
 
-    <div id="nav">
-        <div class="header">SYSTEM_FORENSICS_v4.2</div>
-        <div class="data-point"><span class="label">Primary Node</span><span id="ip">127.0.0.1</span></div>
-        <div class="data-point"><span class="label">Geo_Location</span><span id="geo">ABU DHABI / UAE</span></div>
-        <div class="data-point"><span class="label">ISP_Backbone</span><span id="isp">...</span></div>
-        <div class="data-point"><span class="label">Latency</span><span id="ping">24ms</span></div>
-        <div class="data-point" style="margin-top:auto">
-            <span class="label">Session Integrity</span>
-            <div style="width:100%; height:4px; background:#002b36; margin-top:5px;">
-                <div id="integrity" style="width:100%; height:100%; background:var(--success)"></div>
+    <div id="sidebar">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 25px; color: #fff;">
+            ARCHANGEL <span style="color: var(--accent);">ENDPOINT</span>
+        </div>
+        
+        <div class="module">
+            <span class="label">Target Resolution</span>
+            <div id="ip" style="color: var(--accent); font-family: monospace;">127.0.0.1</div>
+            <div id="loc" style="font-size: 12px; margin-top: 4px;">ABU DHABI // UAE</div>
+        </div>
+
+        <div class="module">
+            <span class="label">Connection Backbone</span>
+            <div id="isp" style="font-size: 11px;">Scanning Local ISP...</div>
+            <div style="margin-top: 8px; font-size: 10px; color: var(--success);">
+                <span class="dot" style="background: var(--success);"></span> ENCRYPTED TUNNEL: ACTIVE
+            </div>
+        </div>
+
+        <div class="module" style="flex: 1; overflow: hidden;">
+            <span class="label">Incident Timeline</span>
+            <div id="timeline" style="font-size: 10px; line-height: 1.8; color: #768390;">
+                [15:11:04] Session Started<br>
+                [15:11:05] Kernel Link Established
             </div>
         </div>
     </div>
 
-    <div id="workspace">
-        <div id="toolbar">
-            <span style="color:var(--success)">● ENCRYPTED_TUNNEL</span>
-            <span>FILESYSTEM: /ROOT/VAR/LOGS</span>
-            <span style="margin-left:auto">USER: PRODIGY_40</span>
+    <div id="main">
+        <div id="top-bar">
+            <span>USER: <span style="color: #fff;">PRODIGY_40</span></span>
+            <span>NODE: <span id="node-id">ARCH-772-DX</span></span>
+            <span style="color: var(--danger);" class="pulse">● LIVE INVESTIGATION IN PROGRESS</span>
         </div>
-        <div id="terminal-wrapper">
-            <div id="terminal"></div><span class="cursor"></span>
+
+        <div id="console-area">
+            <div id="console"></div>
         </div>
-        <div id="activity-log" id="logs-container">
-            <div class="label" style="margin-bottom:10px">Live Traffic Analysis</div>
-            <div id="live-logs"></div>
+
+        <div id="bottom-panel">
+            <div id="memory-dump"></div>
+            <div id="packet-sniffer">
+                <span class="label">Live Packet Stream</span>
+                <div id="stream-content"></div>
+            </div>
         </div>
     </div>
 
+    <audio id="keyClick" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
+
     <script>
-        // Real IP/City Fetch
+        // Real-Time Data Injection
         fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
             document.getElementById('ip').innerText = d.ip;
-            document.getElementById('geo').innerText = d.city.toUpperCase() + " / " + d.country_name;
             document.getElementById('isp').innerText = d.org;
+            document.getElementById('node-id').innerText = "ARCH-" + d.ip.split('.').pop() + "-NODE";
         });
 
         const commands = [
-            "sudo tcpdump -i eth0 -vv",
-            "Establishing handshake with remote kernel... [OK]",
-            "DECRYPTING RSA-4096 BITSTREAM...",
-            "mount -t ext4 /dev/sdb1 /mnt/recovery",
-            "grep -r 'password' /etc/shadow",
-            "Nmap scan report for 192.168.1.1",
-            "PORT     STATE  SERVICE",
-            "22/tcp   open   ssh",
-            "80/tcp   open   http",
-            "Injecting payload to memory address 0x40... SUCCESS",
-            "Clearing system event logs to prevent detection...",
-            "Status: Math_Prodigy_Efficiency at 40/40."
+            "Initializing deep packet inspection on interface 'eth0'...",
+            "Checking kernel modules for unauthorized persistence...",
+            "sysctl -w net.ipv4.ip_forward=1",
+            "ps -p $(pgrep sibling_process) -o comm=,args=",
+            "Warning: Memory corruption detected at offset 0x40BA",
+            "Decrypting AES-256 handshake for remote host...",
+            "Extracting filesystem metadata from /Users/Admin/Documents/...",
+            "SUCCESS: Credentials matched. Math_Prodigy verification: 40/40.",
+            "Analyzing entropy in partition /dev/nvme0n1p3",
+            "Connection re-routed through local Abu Dhabi proxy...",
+            "Alert: File 'lantern_repair.sh' modified by external user."
         ];
 
         let cmdIdx = 0;
         let charIdx = 0;
-        const terminal = document.getElementById('terminal');
+        const consoleEl = document.getElementById('console');
+        const memoryEl = document.getElementById('memory-dump');
 
-        function handleInput(e) {
-            // Allow system keys
+        function processInput(e) {
+            // WHX: Allow F5, Ctrl+R, etc.
             if (e.ctrlKey || e.metaKey || e.key.startsWith('F')) return;
             e.preventDefault();
+            
+            document.getElementById('keyClick').cloneNode(true).play();
 
-            // Typing Logic
-            const speed = 3;
-            for(let k=0; k<speed; k++) {
+            // Typing Loop
+            for(let k=0; k<5; k++) {
                 if (charIdx < commands[cmdIdx].length) {
-                    terminal.innerHTML += commands[cmdIdx][charIdx];
+                    consoleEl.innerHTML += commands[cmdIdx][charIdx];
                     charIdx++;
                 } else {
-                    terminal.innerHTML += "<br>";
+                    consoleEl.innerHTML += "<br>";
                     cmdIdx = (cmdIdx + 1) % commands.length;
                     charIdx = 0;
                 }
             }
 
-            // Scroll Terminal
-            const wrapper = document.getElementById('terminal-wrapper');
-            wrapper.scrollTop = wrapper.scrollHeight;
+            // Scroll Logic
+            document.getElementById('console-area').scrollTop = document.getElementById('console-area').scrollHeight;
 
-            // Generate Fake Live Traffic
-            if (Math.random() > 0.8) {
-                const logs = document.getElementById('live-logs');
-                const log = document.createElement('div');
-                log.className = 'log-entry';
-                log.innerText = `[${new Date().toLocaleTimeString()}] INBOUND TCP/TLS ${Math.floor(Math.random()*65535)} -> PORT 443 [ESTABLISHED]`;
-                logs.prepend(log);
-                if (logs.childNodes.length > 8) logs.removeChild(logs.lastChild);
+            updateForensics();
+        }
+
+        function updateForensics() {
+            // Hex Dump Generator
+            let hex = `0x${Math.floor(Math.random()*1e7).toString(16).toUpperCase()} `;
+            for(let j=0; j<12; j++) hex += Math.floor(Math.random()*256).toString(16).padStart(2,'0') + " ";
+            memoryEl.innerHTML += hex + "<br>";
+            if(memoryEl.innerHTML.split('<br>').length > 12) memoryEl.innerHTML = memoryEl.innerHTML.split('<br>').slice(1).join('<br>');
+
+            // Packet Stream Generator
+            if (Math.random() > 0.7) {
+                const stream = document.getElementById('stream-content');
+                const p = document.createElement('div');
+                p.innerText = `TCP [${Math.floor(Math.random()*65535)}] > TLS_V1.3 [ACK] Len=${Math.floor(Math.random()*1500)}`;
+                stream.prepend(p);
+                if(stream.childNodes.length > 12) stream.removeChild(stream.lastChild);
             }
         }
     </script>
