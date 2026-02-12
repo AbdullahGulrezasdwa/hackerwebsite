@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TERMINAL_ROOT_ACCESS</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #00ff41; /* classic hacker green */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden; /* Hide scrollbars */
+            line-height: 1.4;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+        }
+
+        #console {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding-bottom: 50px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: #00ff41;
+            animation: blink 0.8s infinite;
+            vertical-align: bottom;
+        }
+
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
+        /* The Popups */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            font-weight: 900;
+            border: 10px solid;
+            padding: 40px 80px;
+            background: #000;
+            z-index: 1000;
+            text-align: center;
+            box-shadow: 0 0 50px currentColor;
+        }
+
+        .granted {
+            color: #00ff41;
+            border-color: #00ff41;
+            animation: pulse-green 0.5s infinite alternate;
+        }
+
+        .denied {
+            color: #ff0000;
+            border-color: #ff0000;
+            animation: pulse-red 0.1s infinite alternate;
+        }
+
+        @keyframes pulse-green { from { box-shadow: 0 0 20px #00ff41; } to { box-shadow: 0 0 80px #00ff41; } }
+        @keyframes pulse-red { from { box-shadow: 0 0 20px #ff0000; } to { box-shadow: 0 0 100px #ff0000; } }
+
+    </style>
+</head>
+<body>
+
+    <div id="console"></div><span class="cursor"></span>
+
+    <div id="access-granted" class="overlay granted">ACCESS GRANTED</div>
+    <div id="access-denied" class="overlay denied">ACCESS DENIED</div>
+
+    <script>
+        // THE "FAKE" CODE (Modified with your lore)
+        const codeBank = `
+// INITIALIZING ABU DHABI MAIN_FRAME...
+// CONNECTING TO SCHOOL_DATABASE...
+#include <iostream>
+#include <vector>
+#include <lantern_security>
+
+using namespace std;
+
+class Student {
+    public:
+        int math_score = 40; // MAX_SCORE DETECTED
+        bool is_genius = true;
+        string location = "UAE_NET_SECURE";
+
+    void hack_mainframe() {
+        if (math_score == 40) {
+            cout << "OVERRIDING SECURITY PROTOCOLS..." << endl;
+            bypass_firewall("Term_2_Exams");
+        }
+    }
+};
+
+// SIBLING INTERFERENCE DETECTED
+// RE-ROUTING POWER TO GPU...
+struct LanternProject {
+    bool destroyed = true;
+    string culprit = "SISTER";
+    void repair() {
+        system("execute_revenge_protocol.exe");
+    }
+};
+
+// DOWNLOADING ENCRYPTED ANSWER KEYS...
+// [===================================>] 99%
+// DECRYPTING...
+// SUCCESS.
+
+void inject_payload() {
+    for(int i=0; i<9999; i++) {
+        memory_address = 0x5F3759DF; 
+        buffer_overflow(true);
+    }
+}
+// SYSTEM BREACH: LEVEL 5
+// WARNING: TRACKING DETECTED
+// DEPLOYING COUNTER-MEASURES...
+`;
+
+        let index = 0;
+        const speed = 4; // Characters per keystroke
+        const consoleDiv = document.getElementById('console');
+        
+        // Counters for "3 times" trigger
+        let altCount = 0;
+        let capsCount = 0;
+
+        document.addEventListener('keydown', (e) => {
+            // PREVENT DEFAULT BROWSER ACTIONS (like sticky keys)
+            if (e.key === "Alt" || e.key === "CapsLock") {
+                e.preventDefault(); 
+            }
+
+            // 1. ESCAPE KEY (Reset everything)
+            if (e.key === "Escape") {
+                document.getElementById('access-granted').style.display = 'none';
+                document.getElementById('access-denied').style.display = 'none';
+                altCount = 0;
+                capsCount = 0;
+                return;
+            }
+
+            // 2. ALT KEY (Trigger Granted)
+            if (e.key === "Alt") {
+                altCount++;
+                if (altCount >= 3) {
+                    document.getElementById('access-granted').style.display = 'block';
+                    document.getElementById('access-denied').style.display = 'none';
+                    altCount = 0; // Reset
+                }
+                return;
+            }
+
+            // 3. CAPS LOCK (Trigger Denied)
+            if (e.key === "CapsLock") {
+                capsCount++;
+                if (capsCount >= 3) {
+                    document.getElementById('access-denied').style.display = 'block';
+                    document.getElementById('access-granted').style.display = 'none';
+                    capsCount = 0; // Reset
+                }
+                return;
+            }
+
+            // 4. ANY OTHER KEY (Type the code)
+            const textChunk = codeBank.substring(index, index + speed);
+            consoleDiv.innerHTML += textChunk.replace(/\n/g, "<br>");
+            index = (index + speed) % codeBank.length; // Loop code if it ends
+
+            // Auto-scroll to bottom
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+</html>
