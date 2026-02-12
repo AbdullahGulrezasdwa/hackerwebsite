@@ -2,114 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TERMINAL_OVERRIDE_V4</title>
+    <title>PHANTOM_PROTOCOL_v5</title>
     <style>
-        :root { --green: #00ff41; --dim-green: rgba(0, 255, 65, 0.2); --alert: #ff003c; }
-        body {
-            background-color: #020202; color: var(--green);
-            font-family: 'Consolas', 'Courier New', monospace;
-            margin: 0; display: flex; height: 100vh; overflow: hidden;
-        }
+        :root { --neon: #00ff41; --dim: rgba(0, 255, 65, 0.1); --warn: #ffcc00; --danger: #ff003c; }
+        body { background: #000; color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* CRT Effect */
+        body::after { content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05)); background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 100; }
 
-        /* Sidebar Stats */
-        #sidebar {
-            width: 250px; border-right: 1px solid var(--dim-green);
-            padding: 20px; font-size: 12px; background: rgba(0,20,0,0.2);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
+        /* Left Panel: Real Stats */
+        #left-panel { width: 300px; border-right: 1px solid var(--neon); padding: 20px; font-size: 12px; background: rgba(0,10,0,0.5); z-index: 10; }
+        .stat-box { border: 1px solid var(--dim); padding: 10px; margin-bottom: 15px; background: rgba(0,255,65,0.05); }
+        .glitch { animation: glitch 1s linear infinite; }
+        @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.7; transform: skew(1deg); } 100% { opacity: 1; } }
 
         /* Main Terminal */
-        #main { flex: 1; padding: 30px; position: relative; overflow: hidden; }
-        #console { white-space: pre-wrap; font-size: 18px; text-shadow: 0 0 5px var(--green); }
+        #terminal-area { flex: 1; padding: 40px; position: relative; display: flex; flex-direction: column; }
+        #console { flex: 1; white-space: pre-wrap; font-size: 18px; line-height: 1.2; overflow: hidden; }
 
-        /* CRT & Glitch Effects */
-        .scanlines {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 4px; z-index: 10; pointer-events: none;
-        }
-        
-        .overlay {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); border: 8px solid; padding: 40px;
-            background: black; z-index: 100; text-align: center; font-size: 50px;
-        }
-        .granted { color: var(--green); border-color: var(--green); box-shadow: 0 0 50px var(--green); }
-        .denied { color: var(--alert); border-color: var(--alert); box-shadow: 0 0 50px var(--alert); }
+        /* Popups */
+        .alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 10px solid; padding: 60px; background: black; z-index: 1000; text-align: center; font-family: 'Arial Black'; font-size: 60px; }
+        .granted { color: var(--neon); border-color: var(--neon); box-shadow: 0 0 100px var(--neon); }
+        .launch { color: var(--warn); border-color: var(--warn); box-shadow: 0 0 100px var(--warn); }
 
-        .stat-row { margin-bottom: 15px; }
-        .bar { width: 100%; height: 5px; background: #111; margin-top: 5px; position: relative; }
-        .fill { height: 100%; background: var(--green); width: 40%; transition: width 0.3s; }
+        /* "Camera" light */
+        #cam-light { width: 10px; height: 10px; background: red; border-radius: 50%; display: inline-block; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.2; } }
     </style>
 </head>
-<body onkeydown="handleInput(event)">
-    <div class="scanlines"></div>
+<body onkeydown="handleKey(event)">
 
-    <div id="sidebar">
-        <div class="stat-row">CPU_LOAD <div class="bar"><div id="cpu" class="fill"></div></div></div>
-        <div class="stat-row">GPU_TEMP <div class="bar"><div id="gpu" class="fill" style="width: 70%"></div></div></div>
-        <hr style="border: 0.5px solid var(--dim-green)">
-        <p>LOCATION: ABU DHABI</p>
-        <p>IP: 192.168.1.40</p>
-        <p>STATUS: INFILTRATING</p>
-        <p>MATH_COEFFICIENT: 40/40</p>
-        <p>OBJECTIVE: REPAIR_LANTERN</p>
+    <div id="left-panel">
+        <h2 class="glitch">SATELLITE_LINK</h2>
+        <div class="stat-box">
+            DEVICE: <span id="os">DETECTING...</span><br>
+            BATTERY: <span id="bat">99%</span><br>
+            RESOLUTION: <span id="res">1920x1080</span>
+        </div>
+        
+        <div class="stat-box">
+            TARGET_IP: <span id="ip" style="color: var(--danger)">0.0.0.0</span><br>
+            NETWORK: <span id="net">PROXIMITY_LOCAL</span><br>
+            REGION: <span id="city" style="color: var(--warn)">SCANNING...</span>
+        </div>
+
+        <div class="stat-box">
+            CAM_STATUS: <span id="cam-light"></span> ACTIVE<br>
+            P_LEVEL: 40/40 MATH_PRODIGY<br>
+            LANTERN_SENSORS: DAMAGED
+        </div>
+
+        <div style="font-size: 10px; opacity: 0.5;">
+            > BYPASSING FIREWALL...<br>
+            > SNIFFING PACKETS...<br>
+            > RE-ROUTING TO UAE_SERVER_1
+        </div>
     </div>
 
-    <div id="main">
+    <div id="terminal-area">
         <div id="console"></div>
     </div>
 
-    <div id="granted" class="overlay granted">ROOT ACCESS GRANTED</div>
-    <div id="denied" class="overlay denied">SECURITY BREACH!</div>
+    <div id="granted" class="alert granted">GATEWAY BYPASSED</div>
+    <div id="launch" class="alert launch">REVENGE_LANTERN.exe<br>LAUNCHED</div>
 
-    <audio id="clickSound" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
+    <audio id="beep" src="https://www.soundjay.com/communication/digital-beeps-05.mp3"></audio>
 
     <script>
+        // 1. GET REAL DATA (The "Scary" Part)
+        document.getElementById('os').innerText = navigator.platform;
+        document.getElementById('res').innerText = window.screen.width + "x" + window.screen.height;
+        
+        // Fetch Real IP and Location
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('ip').innerText = data.ip;
+                document.getElementById('city').innerText = data.city + ", " + data.country;
+                document.getElementById('net').innerText = data.org; // This shows their ISP/Internet provider
+            });
+
+        // Battery Tracking
+        navigator.getBattery().then(bat => {
+            document.getElementById('bat').innerText = (bat.level * 100) + "%";
+        });
+
+        // 2. THE HACKER TYPER LOGIC
         const code = `
-# CONNECTING TO CORE_SERVICES...
-import uae_encryption_v2 as secure
-from math_prodigy import calculate_40
+# PHANTOM_PROTOCOL INITIATED
+# SOURCE: ABU_DHABI_HIDDEN_NODE
+# LOADING MATH_MODULES (STABILITY: 40/40)
 
-def initialize_bypass():
-    gateway = secure.connect("MAIN_FRAME")
-    if calculate_40() == "OPTIMAL":
-        print(">> FIREWALL DISMANTLED")
-        gateway.inject_payload(0x7F)
-    else:
-        raise SecurityError("SIBLING_INTERFERENCE_DETECTED")
+def master_infiltrate():
+    connection = satellite.link("TARGET_ZONE")
+    if connection.is_secured:
+        connection.force_open(port=8080)
+        print(">> BYPASSING ROUTER SETTINGS")
+        print(">> HARVESTING LOCAL_SSID_DATA")
+    
+    // INJECTING LANTERN_REPAIR_SCRIPT...
+    // [####################] 100%
+    
+    // ACCESSING SIBLING_PC_01...
+    // STATUS: VULNERABLE
+    // ACTION: PREVENT_LANTERN_RIPPING = TRUE
 
-// ACCESSING CLOUD_DATABASE_7...
-// TARGET: LANTERN_STABILIZER_V3
-// DECRYPTING: [########..........] 40%
-// STACK OVERFLOW PREVENTED
-// EXECUTING SHELL_CODE...
+while True:
+    packet = listen_to_network()
+    if "40/40" in packet:
+        deploy_hacker_mode()
 `;
+
         let i = 0;
-        let triggers = { alt: 0, caps: 0 };
+        let altCount = 0, shiftCount = 0;
 
-        function handleInput(e) {
+        function handleKey(e) {
             e.preventDefault();
-            document.getElementById('clickSound').cloneNode(true).play();
-
-            // Stats randomizer
-            document.getElementById('cpu').style.width = Math.random() * 100 + "%";
+            document.getElementById('beep').cloneNode(true).play();
 
             if (e.key === "Escape") {
-                document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
                 return;
             }
 
             if (e.key === "Alt") {
-                triggers.alt++;
-                if (triggers.alt >= 3) document.getElementById('granted').style.display = 'block';
-            } else if (e.key === "CapsLock") {
-                triggers.caps++;
-                if (triggers.caps >= 3) document.getElementById('denied').style.display = 'block';
+                altCount++;
+                if (altCount >= 3) document.getElementById('granted').style.display = 'block';
+            } else if (e.key === "Shift") {
+                shiftCount++;
+                if (shiftCount >= 3) document.getElementById('launch').style.display = 'block';
             } else {
-                let speed = 4;
-                document.getElementById('console').innerHTML += code.substring(i, i + speed).replace(/\n/g, "<br>");
-                i = (i + speed) % code.length;
+                let chunk = code.substring(i, i + 5);
+                document.getElementById('console').innerHTML += chunk.replace(/\n/g, "<br>");
+                i = (i + 5) % code.length;
                 window.scrollTo(0, document.body.scrollHeight);
             }
         }
