@@ -2,182 +2,149 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TERMINAL_ROOT_ACCESS</title>
+    <title>SYSTEM_ROOT_DIRECT_ACCESS</title>
     <style>
+        :root { --glow: #00ff41; --danger: #ff0000; --gold: #ffcc00; }
         body {
-            background-color: #0d0d0d;
-            color: #00ff41; /* classic hacker green */
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
-            margin: 0;
-            padding: 20px;
-            overflow: hidden; /* Hide scrollbars */
-            line-height: 1.4;
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.5);
+            background-color: #050505;
+            color: var(--glow);
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            margin: 0; padding: 30px;
+            overflow: hidden;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
         }
 
-        #console {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            padding-bottom: 50px;
+        /* Scanline CRT Effect */
+        body::before {
+            content: " ";
+            position: fixed; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 2; pointer-events: none;
         }
 
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 18px;
-            background-color: #00ff41;
-            animation: blink 0.8s infinite;
-            vertical-align: bottom;
-        }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-
-        /* The Popups */
+        #console { white-space: pre-wrap; word-wrap: break-word; z-index: 1; position: relative; }
+        
+        /* Popups */
         .overlay {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
+            display: none; position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 80px;
-            font-weight: 900;
-            border: 10px solid;
-            padding: 40px 80px;
-            background: #000;
-            z-index: 1000;
-            text-align: center;
-            box-shadow: 0 0 50px currentColor;
+            font-size: 70px; font-weight: 900;
+            border: 15px solid; padding: 50px;
+            background: rgba(0,0,0,0.9); z-index: 1000;
+            text-align: center; font-family: 'Arial Black', sans-serif;
         }
+        .granted { color: var(--glow); border-color: var(--glow); box-shadow: 0 0 100px var(--glow); }
+        .denied { color: var(--danger); border-color: var(--danger); box-shadow: 0 0 100px var(--danger); }
+        .nuclear { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 100px var(--gold); font-size: 50px; }
 
-        .granted {
-            color: #00ff41;
-            border-color: #00ff41;
-            animation: pulse-green 0.5s infinite alternate;
-        }
-
-        .denied {
-            color: #ff0000;
-            border-color: #ff0000;
-            animation: pulse-red 0.1s infinite alternate;
-        }
-
-        @keyframes pulse-green { from { box-shadow: 0 0 20px #00ff41; } to { box-shadow: 0 0 80px #00ff41; } }
-        @keyframes pulse-red { from { box-shadow: 0 0 20px #ff0000; } to { box-shadow: 0 0 100px #ff0000; } }
-
+        .cursor { display: inline-block; width: 12px; height: 20px; background: var(--glow); animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
-<body>
+<body onkeydown="handleInput(event)">
 
     <div id="console"></div><span class="cursor"></span>
 
-    <div id="access-granted" class="overlay granted">ACCESS GRANTED</div>
-    <div id="access-denied" class="overlay denied">ACCESS DENIED</div>
+    <div id="granted" class="overlay granted">ACCESS GRANTED</div>
+    <div id="denied" class="overlay denied">ACCESS DENIED</div>
+    <div id="nuclear" class="overlay nuclear">NUCLEAR LAUNCH INITIATED<br><span id="timer">10.00</span></div>
 
     <script>
-        // THE "FAKE" CODE (Modified with your lore)
         const codeBank = `
-// INITIALIZING ABU DHABI MAIN_FRAME...
-// CONNECTING TO SCHOOL_DATABASE...
-#include <iostream>
-#include <vector>
-#include <lantern_security>
+/* UNAUTHORIZED ACCESS DETECTED - KERNEL REV 4.0.1  */
+#include <network_bridge.h>
+#include <uae_gateway_auth.h>
 
-using namespace std;
-
-class Student {
-    public:
-        int math_score = 40; // MAX_SCORE DETECTED
-        bool is_genius = true;
-        string location = "UAE_NET_SECURE";
-
-    void hack_mainframe() {
-        if (math_score == 40) {
-            cout << "OVERRIDING SECURITY PROTOCOLS..." << endl;
-            bypass_firewall("Term_2_Exams");
-        }
-    }
-};
-
-// SIBLING INTERFERENCE DETECTED
-// RE-ROUTING POWER TO GPU...
-struct LanternProject {
-    bool destroyed = true;
-    string culprit = "SISTER";
-    void repair() {
-        system("execute_revenge_protocol.exe");
-    }
-};
-
-// DOWNLOADING ENCRYPTED ANSWER KEYS...
-// [===================================>] 99%
-// DECRYPTING...
-// SUCCESS.
-
-void inject_payload() {
-    for(int i=0; i<9999; i++) {
-        memory_address = 0x5F3759DF; 
-        buffer_overflow(true);
+// VERIFYING USER: MATH_GENIUS_40_40
+// BYPASSING SIBLING_LANTERN_LOCKOUT...
+void start_breach() {
+    socket = open_port(8080);
+    if (socket.status == "OPEN") {
+        inject_payload("0x7FFD23001");
+        log("FIREWALL DISMANTLED BY 40/40 LOGIC");
     }
 }
-// SYSTEM BREACH: LEVEL 5
-// WARNING: TRACKING DETECTED
-// DEPLOYING COUNTER-MEASURES...
+
+class Mainframe {
+    private:
+        string secret_key = "REVENGE_FOR_LANTERNS";
+    public:
+        void override() {
+            while(true) {
+                this->encrypt_all();
+                this->send_to_abu_dhabi_node();
+            }
+        }
+};
+
+static int init_hack(void) {
+    struct task_struct *p;
+    for_each_process(p) {
+        if (p->pid == 1) p->priority = 0; // GOD MODE
+    }
+    return SUCCESS;
+}
+
+// ACCESSING SATELLITE...
+// ORBITAL POSITION: 24.4539° N, 54.3773° E
+// STATUS: CONNECTED
+// TARGETING: ENTIRE INTERNET...
 `;
 
-        let index = 0;
-        const speed = 4; // Characters per keystroke
-        const consoleDiv = document.getElementById('console');
-        
-        // Counters for "3 times" trigger
-        let altCount = 0;
-        let capsCount = 0;
+        let i = 0;
+        let altPresses = 0, capsPresses = 0, shiftPresses = 0;
+        const consoleEl = document.getElementById('console');
 
-        document.addEventListener('keydown', (e) => {
-            // PREVENT DEFAULT BROWSER ACTIONS (like sticky keys)
-            if (e.key === "Alt" || e.key === "CapsLock") {
-                e.preventDefault(); 
-            }
+        function handleInput(e) {
+            e.preventDefault();
 
-            // 1. ESCAPE KEY (Reset everything)
+            // 1. ESC to Clear
             if (e.key === "Escape") {
-                document.getElementById('access-granted').style.display = 'none';
-                document.getElementById('access-denied').style.display = 'none';
-                altCount = 0;
-                capsCount = 0;
+                document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+                altPresses = 0; capsPresses = 0; shiftPresses = 0;
                 return;
             }
 
-            // 2. ALT KEY (Trigger Granted)
+            // 2. Trigger Logic
             if (e.key === "Alt") {
-                altCount++;
-                if (altCount >= 3) {
-                    document.getElementById('access-granted').style.display = 'block';
-                    document.getElementById('access-denied').style.display = 'none';
-                    altCount = 0; // Reset
-                }
-                return;
+                altPresses++;
+                if (altPresses >= 3) showOverlay('granted');
+            } else if (e.key === "CapsLock") {
+                capsPresses++;
+                if (capsPresses >= 3) showOverlay('denied');
+            } else if (e.key === "Shift") {
+                shiftPresses++;
+                if (shiftPresses >= 3) showOverlay('nuclear');
+            } else {
+                // 3. Normal Typing
+                let speed = (e.code === "Space") ? 15 : 4; // Spacebar turbo
+                let chunk = codeBank.substring(i, i + speed);
+                consoleEl.innerHTML += chunk.replace(/\n/g, "<br>");
+                i = (i + speed) % codeBank.length;
+                window.scrollTo(0, document.body.scrollHeight);
             }
+        }
 
-            // 3. CAPS LOCK (Trigger Denied)
-            if (e.key === "CapsLock") {
-                capsCount++;
-                if (capsCount >= 3) {
-                    document.getElementById('access-denied').style.display = 'block';
-                    document.getElementById('access-granted').style.display = 'none';
-                    capsCount = 0; // Reset
+        function showOverlay(id) {
+            document.getElementById(id).style.display = 'block';
+            if (id === 'nuclear') startCountdown();
+        }
+
+        function startCountdown() {
+            let count = 10.00;
+            const timerEl = document.getElementById('timer');
+            const interval = setInterval(() => {
+                count -= 0.01;
+                timerEl.innerText = count.toFixed(2);
+                if (count <= 0) {
+                    clearInterval(interval);
+                    timerEl.innerText = "LAUNCHED";
                 }
-                return;
-            }
-
-            // 4. ANY OTHER KEY (Type the code)
-            const textChunk = codeBank.substring(index, index + speed);
-            consoleDiv.innerHTML += textChunk.replace(/\n/g, "<br>");
-            index = (index + speed) % codeBank.length; // Loop code if it ends
-
-            // Auto-scroll to bottom
-            window.scrollTo(0, document.body.scrollHeight);
-        });
+            }, 10);
+        }
     </script>
 </body>
 </html>
