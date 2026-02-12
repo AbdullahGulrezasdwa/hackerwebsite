@@ -1,117 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>ARCHANGEL // Tactical Operations Suite v5.1</title>
-    <style>
-        :root {
-            --bg: #0a0c10; --panel: #11151c; --border: #232a35;
-            --text: #c9d1d9; --muted: #6e7681; --accent: #3b82f6;
-            --danger: #ef4444; --success: #22c55e;
-        }
-
-        * { box-sizing: border-box; scrollbar-width: none; }
-        body { 
-            margin: 0; background: var(--bg); color: var(--text); 
-            font-family: 'JetBrains Mono', 'Consolas', monospace; 
-            height: 100vh; display: grid; grid-template-columns: 320px 1fr;
-        }
-
-        /* SIDEBAR Glass Effect */
-        #sidebar { 
-            background: var(--panel); border-right: 1px solid var(--border); 
-            padding: 25px; display: flex; flex-direction: column; gap: 20px; 
-            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
-        }
-
-        .module { 
-            border: 1px solid var(--border); padding: 15px; background: #0d1117; 
-            border-radius: 4px; position: relative; overflow: hidden;
-        }
-
-        .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
-        .metric { font-size: 16px; margin-top: 8px; font-weight: bold; color: #fff; }
-
-        .progress { height: 4px; background: #1a212a; margin-top: 10px; border-radius: 2px; overflow: hidden; }
-        .progress div { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* MAIN WORKSPACE */
-        #main { display: grid; grid-template-rows: 45px 1fr 220px; }
-        #topbar { 
-            background: var(--panel); border-bottom: 1px solid var(--border); 
-            display: flex; align-items: center; padding: 0 25px; font-size: 11px; 
-            justify-content: space-between; letter-spacing: 1px;
-        }
-
-        #console { 
-            padding: 30px; overflow-y: auto; background: #05070a; 
-            display: flex; flex-direction: column; gap: 4px;
-        }
-
-        .line { font-size: 14px; line-height: 1.6; animation: fadeIn 0.2s ease-in; }
-        .prompt { color: var(--accent); font-weight: bold; margin-right: 10px; }
-        
-        #cmdInput { 
-            background: none; border: none; outline: none; color: #fff; 
-            font-family: inherit; font-size: 14px; width: 80%;
-        }
-
-        #bottom { display: grid; grid-template-columns: 1fr 400px; border-top: 1px solid var(--border); background: #080b10; }
-        #memory, #packets { padding: 15px; font-size: 11px; font-family: monospace; line-height: 1.4; color: #4e5660; }
-        #packets { color: var(--success); border-left: 1px solid var(--border); }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
-    </style>
-</head>
-<body>
-
-<div id="sidebar">
-    <div style="padding-bottom: 20px; border-bottom: 1px solid var(--border);">
-        <h3 style="margin:0; letter-spacing: 2px;">ARCHANGEL <span style="color:var(--accent)">v5.1</span></h3>
-        <div style="font-size: 10px; color: var(--muted); margin-top: 5px;">TACTICAL OPERATIONS SUITE</div>
-    </div>
-
-    <div class="module">
-        <div class="label">Primary Node</div>
-        <div class="metric" id="ip" style="font-size: 13px; color: var(--accent);">Resolving...</div>
-    </div>
-
-    <div class="module">
-        <div class="label">Neural Core Load</div>
-        <div class="progress"><div id="cpuBar"></div></div>
-        <div class="metric" id="cpuText">0%</div>
-    </div>
-
-    <div class="module">
-        <div class="label">Memory Buffer</div>
-        <div class="progress"><div id="ramBar" style="background:var(--success)"></div></div>
-        <div class="metric" id="ramText">0%</div>
-    </div>
-</div>
-
-<div id="main">
-    <div id="topbar">
-        <div><span style="color:var(--muted)">OPERATOR:</span> PRODIGY_40</div>
-        <div style="color:var(--danger)"><span class="blink">●</span> ENCRYPTED SESSION ACTIVE</div>
-    </div>
-
-    <div id="console"></div>
-
-    <div id="bottom">
-        <div id="memory"></div>
-        <div id="packets"></div>
-    </div>
-</div>
+<style>
+    /* Add a subtle scanline effect to the console for realism */
+    #console::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        z-index: 2;
+        background-size: 100% 3px, 3px 100%;
+        pointer-events: none;
+    }
+    
+    .error-line { color: var(--danger); font-style: italic; opacity: 0.8; }
+    .searching { color: var(--warning); font-size: 12px; }
+</style>
 
 <script>
 const consoleEl = document.getElementById("console");
-const memoryEl = document.getElementById("memory");
-const packetEl = document.getElementById("packets");
 
-// NEW: Smooth Async Printer
-async function print(text, delay = 20) {
+// SLOWER TYPING: Changed delay from 20 to 50 for a "Mechanical" feel
+async function print(text, delay = 50, isError = false) {
     const div = document.createElement("div");
-    div.className = "line";
+    div.className = isError ? "line error-line" : "line";
     consoleEl.appendChild(div);
     
     for (let char of text) {
@@ -121,79 +32,61 @@ async function print(text, delay = 20) {
     }
 }
 
-function prompt() {
-    const line = document.createElement("div");
-    line.className = "line";
-    line.innerHTML = `<span class="prompt">ARCHANGEL></span><input id="cmdInput" spellcheck="false" autocomplete="off" />`;
-    consoleEl.appendChild(line);
-    
-    const input = document.getElementById("cmdInput");
-    input.focus();
-
-    input.addEventListener("keydown", async function(e) {
-        if (e.key === "Enter") {
-            const val = input.value;
-            line.innerHTML = `<span class="prompt">ARCHANGEL></span> ${val}`;
-            await processCommand(val.trim().toLowerCase());
-            prompt();
-        }
-    });
-}
-
 async function processCommand(cmd) {
     if (!cmd) return;
+
+    // Show "Searching" feedback before the result
+    const searchDiv = document.createElement("div");
+    searchDiv.className = "line searching";
+    searchDiv.innerHTML = `> Querying internal database for '${cmd}'...`;
+    consoleEl.appendChild(searchDiv);
+    
+    // 1.5 second "Simulation Delay" to make it feel like a real search
+    await new Promise(r => setTimeout(r, 1500));
+    searchDiv.remove();
     
     switch(cmd) {
         case "help":
-            await print("> Available modules: scan, trace, decrypt, clear, status");
+            await print("[LISTING ACCESSIBLE MODULES]");
+            await print("1. SCAN - Heuristic System Audit");
+            await print("2. TRACE - Network Route Mapping");
+            await print("3. CLEAR - Purge Terminal Buffer");
+            await print("4. SYSTEM - View Local Node Specs");
             break;
+
         case "scan":
-            await print("[*] Initiating deep-layer heuristic scan...");
-            await new Promise(r => setTimeout(r, 800));
-            await print("[+] Result: All systems nominal. 40/40 integrity.");
-            break;
-        case "decrypt":
-            await print("[!] Initializing brute-force on remote buffer...");
-            await print("[####------] 40% Complete...");
+            await print("[!] Initializing deep-layer audit...", 100);
             await new Promise(r => setTimeout(r, 1000));
-            await print("[SUCCESS] Partition mounted at /mnt/vault");
+            await print("[+] Result: System Integrity 100% (40/40 confirmed).");
             break;
+
+        case "system":
+            await print(`[ID] ARCH-PRODIGY-09`);
+            await print(`[OS] Archangel-Core v5.2 (Unix-like)`);
+            await print(`[COORDS] ${document.getElementById("ip").innerText}`);
+            break;
+
         case "clear":
             consoleEl.innerHTML = "";
             break;
+
+        // THE "BETTER" ERROR HANDLING
         default:
-            await print(`[-] Error: Command '${cmd}' not recognized in this kernel.`);
+            const errorTypes = [
+                `[-] UNIDENTIFIED_COMMAND: '${cmd}' does not exist in the /bin directory.`,
+                `[!] ACCESS_DENIED: User 'PRODIGY_40' does not have permission for '${cmd}'.`,
+                `[-] KERNEL_ERROR: Instruction pointer overflow at '${cmd}'.`,
+                `[?] '${cmd}' is not recognized as an internal or external command.`
+            ];
+            // Randomly picks an "Error" style to make it look smarter
+            const randomError = errorTypes[Math.floor(Math.random() * errorTypes.length)];
+            await print(randomError, 40, true);
+            
+            // Add to a secret security log in the console
+            console.warn(`Intrusion Alert: Unrecognized command '${cmd}' logged to /var/log/security.`);
     }
 }
 
-// Stats Generation (Faster & More Dynamic)
-function updateStats() {
-    const cpu = Math.floor(Math.random() * 15) + 30; // Realer jitter
-    const ram = Math.floor(Math.random() * 5) + 60;
-
-    document.getElementById("cpuBar").style.width = cpu + "%";
-    document.getElementById("cpuText").innerText = cpu + "%";
-    document.getElementById("ramBar").style.width = ram + "%";
-    document.getElementById("ramText").innerText = ram + "%";
-
-    // Memory Stream
-    let hex = "0x" + Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8, '0') + " ";
-    for(let i=0; i<6; i++) hex += Math.floor(Math.random()*256).toString(16).padStart(2,"0") + " ";
-    memoryEl.innerHTML = hex + "<br>" + memoryEl.innerHTML.slice(0, 500);
-
-    // Packet Stream
-    const p = `INBOUND [${Math.floor(Math.random()*65535)}] -> 192.168.1.40 [TLS1.3]`;
-    packetEl.innerHTML = p + "<br>" + packetEl.innerHTML.slice(0, 500);
-}
-
-setInterval(updateStats, 800);
-
-fetch("https://ipapi.co/json/")
-    .then(r => r.json())
-    .then(d => { document.getElementById("ip").innerText = d.ip + " // " + d.city.toUpperCase(); })
-    .catch(() => { document.getElementById("ip").innerText = "LOCAL_NODE // 127.0.0.1"; });
-
-print("ARCHANGEL CORE v5.1 SECURE LINK ESTABLISHED...", 10).then(prompt);
+// Ensure the prompt function is called after the first print
+print("ARCHANGEL // DEEP DATA LINK ESTABLISHED", 30).then(prompt);
 </script>
-</body>
-</html>
