@@ -2,188 +2,125 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PHANTOM_NODE_v8_INFINITE</title>
+    <title>Enterprise Security Console - Node_AD_09</title>
     <style>
-        :root { --neon: #00ff41; --danger: #ff003c; --bg: #050505; }
+        :root {
+            --bg: #002b36; --text: #839496; --highlight: #268bd2;
+            --warn: #cb4b16; --success: #859900; --sidebar-bg: #073642;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', 'Ubuntu Mono', monospace; }
+        body { background: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar: Professional System Stats */
+        #nav { width: 300px; background: var(--sidebar-bg); border-right: 1px solid #586e75; display: flex; flex-direction: column; padding: 20px; }
+        .header { font-size: 12px; font-weight: bold; color: var(--highlight); margin-bottom: 20px; letter-spacing: 1px; }
+        .data-point { margin-bottom: 15px; font-size: 13px; border-bottom: 1px solid rgba(131, 148, 150, 0.1); padding-bottom: 5px; }
+        .label { display: block; font-size: 10px; color: #586e75; text-transform: uppercase; }
+
+        /* Main Workspace */
+        #workspace { flex: 1; display: flex; flex-direction: column; background: #001f27; }
+        #toolbar { height: 40px; background: #073642; border-bottom: 1px solid #586e75; display: flex; align-items: center; padding: 0 20px; font-size: 12px; gap: 20px; }
         
-        /* THE KEY FIX: Ensuring the body and main containers allow scrolling */
-        html, body { 
-            background: var(--bg); color: var(--neon); 
-            font-family: 'Courier New', monospace; 
-            margin: 0; padding: 0; height: 100vh; width: 100vw;
-            display: flex; overflow: hidden; 
-        }
-
-        /* Sidebar stays fixed */
-        #sidebar {
-            width: 320px; border-right: 1px solid var(--neon);
-            padding: 20px; background: rgba(0, 10, 0, 0.95);
-            display: flex; flex-direction: column; gap: 15px; z-index: 20;
-        }
-
-        /* THE MAIN SCROLL FIX */
-        #main-container { 
-            flex: 1; 
-            padding: 40px; 
-            overflow-y: auto; /* Allows you to scroll manually */
-            display: flex; 
-            flex-direction: column;
-            scroll-behavior: smooth;
-        }
-
-        #console { 
-            white-space: pre-wrap; 
-            font-size: 19px; 
-            line-height: 1.4; 
-            text-shadow: 0 0 5px var(--neon);
-            padding-bottom: 100px; /* Space at the bottom */
-        }
-
-        /* Visuals */
-        .stat-box { border: 1px solid rgba(0, 255, 65, 0.3); padding: 10px; font-size: 12px; background: rgba(0,20,0,0.5); }
-        #progress-fill { width: 0%; height: 10px; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.2s; }
+        /* The "Hacker" Typer Area */
+        #terminal-wrapper { flex: 1; padding: 20px; overflow-y: hidden; position: relative; }
+        #terminal { white-space: pre-wrap; font-family: 'Consolas', monospace; font-size: 14px; line-height: 1.5; color: #93a1a1; }
         
-        /* The Alerts */
-        .popup {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            border: 10px double; padding: 60px; background: black; z-index: 3000;
-            text-align: center; font-size: 50px; font-family: 'Impact', sans-serif;
-        }
-        .success { color: var(--neon); border-color: var(--neon); }
-        .intruder { color: var(--danger); border-color: var(--danger); animation: flash 0.2s infinite; }
+        /* Bottom Activity Log */
+        #activity-log { height: 200px; border-top: 1px solid #586e75; background: var(--sidebar-bg); padding: 15px; overflow: hidden; font-size: 11px; }
+        .log-entry { margin-bottom: 4px; border-left: 2px solid var(--highlight); padding-left: 8px; }
 
-        @keyframes flash { 0% { background: black; } 50% { background: #300; } 100% { background: black; } }
-        
-        /* CRT Overlay */
-        .crt { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-               background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-               background-size: 100% 3px; pointer-events: none; z-index: 1000; }
+        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--highlight); animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body onkeydown="handleInput(event)">
-    <div class="crt"></div>
 
-    <div id="sidebar">
-        <div style="border: 2px solid var(--neon); padding: 10px; text-align: center;">
-            <div id="scan-line" style="height: 2px; background: var(--neon); animation: scan 2s infinite linear;"></div>
-            <span style="font-size: 10px;">FACIAL_RECOGNITION: <span style="color:white">OK</span></span>
-        </div>
-        
-        <div class="stat-box">
-            <div style="color:white; font-weight:bold;">> NODE_INFO</div>
-            IP: <span id="ip">0.0.0.0</span><br>
-            LOC: <span id="loc">ABU DHABI</span><br>
-            THREAT: <span style="color:red">MAXIMUM</span>
-        </div>
-
-        <div class="stat-box">
-            DECRYPTION: <span id="perc">0</span>%
-            <div style="width:100%; background:#111; height:10px; margin-top:5px;">
-                <div id="progress-fill"></div>
+    <div id="nav">
+        <div class="header">SYSTEM_FORENSICS_v4.2</div>
+        <div class="data-point"><span class="label">Primary Node</span><span id="ip">127.0.0.1</span></div>
+        <div class="data-point"><span class="label">Geo_Location</span><span id="geo">ABU DHABI / UAE</span></div>
+        <div class="data-point"><span class="label">ISP_Backbone</span><span id="isp">...</span></div>
+        <div class="data-point"><span class="label">Latency</span><span id="ping">24ms</span></div>
+        <div class="data-point" style="margin-top:auto">
+            <span class="label">Session Integrity</span>
+            <div style="width:100%; height:4px; background:#002b36; margin-top:5px;">
+                <div id="integrity" style="width:100%; height:100%; background:var(--success)"></div>
             </div>
         </div>
-
-        <div id="logs" style="font-size: 10px; color: rgba(0,255,65,0.4); flex:1; overflow:hidden;"></div>
     </div>
 
-    <div id="main-container">
-        <div id="console"></div>
-        <div id="scroll-anchor"></div> </div>
-
-    <div id="granted" class="popup success">ACCESS GRANTED</div>
-    <div id="intruder-alert" class="popup intruder">SIBLING DETECTED!<br>LOCKING SYSTEM</div>
-
-    <audio id="click" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
+    <div id="workspace">
+        <div id="toolbar">
+            <span style="color:var(--success)">● ENCRYPTED_TUNNEL</span>
+            <span>FILESYSTEM: /ROOT/VAR/LOGS</span>
+            <span style="margin-left:auto">USER: PRODIGY_40</span>
+        </div>
+        <div id="terminal-wrapper">
+            <div id="terminal"></div><span class="cursor"></span>
+        </div>
+        <div id="activity-log" id="logs-container">
+            <div class="label" style="margin-bottom:10px">Live Traffic Analysis</div>
+            <div id="live-logs"></div>
+        </div>
+    </div>
 
     <script>
-        // Real-time data
-        fetch('https://ipapi.co/json/').then(res => res.json()).then(data => {
-            document.getElementById('ip').innerText = data.ip;
-            document.getElementById('loc').innerText = data.city + ", UAE";
+        // Real IP/City Fetch
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(d => {
+            document.getElementById('ip').innerText = d.ip;
+            document.getElementById('geo').innerText = d.city.toUpperCase() + " / " + d.country_name;
+            document.getElementById('isp').innerText = d.org;
         });
 
-        const codeBank = `
-/* SPECTER_NODE v8 - SCROLL_OPTIMIZED */
-#include <uae_core.h>
-#define IQ 180
+        const commands = [
+            "sudo tcpdump -i eth0 -vv",
+            "Establishing handshake with remote kernel... [OK]",
+            "DECRYPTING RSA-4096 BITSTREAM...",
+            "mount -t ext4 /dev/sdb1 /mnt/recovery",
+            "grep -r 'password' /etc/shadow",
+            "Nmap scan report for 192.168.1.1",
+            "PORT     STATE  SERVICE",
+            "22/tcp   open   ssh",
+            "80/tcp   open   http",
+            "Injecting payload to memory address 0x40... SUCCESS",
+            "Clearing system event logs to prevent detection...",
+            "Status: Math_Prodigy_Efficiency at 40/40."
+        ];
 
-void hack() {
-    System.Override("FIREWALL_01");
-    if (Math.Prodigy == 40) {
-        Satellite.Link("ABU_DHABI_MAIN");
-        Print("BYPASSING GATEWAY...");
-    }
-}
-
-// INFILTRATING ENCRYPTED SECTOR...
-// REPAIRING LANTERN_FRAME_04...
-// ANTI-RIP_PROTOCOL: ACTIVATED
-// SIBLING_BYPASS: SUCCESSFUL
-
-while(true) {
-    Packet.Sniff("ETISALAT_NODE");
-    Data.Decrypt(0x40);
-}
-`;
-
-        let i = 0;
-        let altCount = 0;
-        let progress = 0;
-        const mainContainer = document.getElementById('main-container');
+        let cmdIdx = 0;
+        let charIdx = 0;
+        const terminal = document.getElementById('terminal');
 
         function handleInput(e) {
-            // Whitelist Browser Controls
+            // Allow system keys
             if (e.ctrlKey || e.metaKey || e.key.startsWith('F')) return;
-
             e.preventDefault();
-            document.getElementById('click').cloneNode(true).play();
 
-            // SISTER ALERT (Delete Key)
-            if (e.key === "Delete") {
-                document.getElementById('intruder-alert').style.display = 'block';
-                return;
-            }
-
-            // RESET (Escape Key)
-            if (e.key === "Escape") {
-                document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
-                return;
-            }
-
-            // SUCCESS (Alt x3)
-            if (e.key === "Alt") {
-                altCount++;
-                if (altCount >= 3) {
-                    document.getElementById('granted').style.display = 'block';
-                    altCount = 0;
+            // Typing Logic
+            const speed = 3;
+            for(let k=0; k<speed; k++) {
+                if (charIdx < commands[cmdIdx].length) {
+                    terminal.innerHTML += commands[cmdIdx][charIdx];
+                    charIdx++;
+                } else {
+                    terminal.innerHTML += "<br>";
+                    cmdIdx = (cmdIdx + 1) % commands.length;
+                    charIdx = 0;
                 }
-                return;
             }
 
-            // TYPING LOGIC
-            let speed = (e.key === " ") ? 30 : 6;
-            let chunk = codeBank.substring(i, i + speed);
-            document.getElementById('console').innerHTML += chunk.replace(/\n/g, "<br>");
-            i = (i + speed) % codeBank.length;
+            // Scroll Terminal
+            const wrapper = document.getElementById('terminal-wrapper');
+            wrapper.scrollTop = wrapper.scrollHeight;
 
-            updateUI();
-
-            // --- THE SCROLL FIX ---
-            // This forces the container to always show the bottom text
-            mainContainer.scrollTop = mainContainer.scrollHeight;
-        }
-
-        function updateUI() {
-            progress = (progress + 0.5) % 100;
-            document.getElementById('progress-fill').style.width = progress + "%";
-            document.getElementById('perc').innerText = Math.floor(progress);
-
+            // Generate Fake Live Traffic
             if (Math.random() > 0.8) {
-                const logs = document.getElementById('logs');
-                const entry = document.createElement('div');
-                entry.innerText = `> INJECT_0x${Math.floor(Math.random()*9999).toString(16)}`;
-                logs.prepend(entry);
-                if (logs.childNodes.length > 20) logs.removeChild(logs.lastChild);
+                const logs = document.getElementById('live-logs');
+                const log = document.createElement('div');
+                log.className = 'log-entry';
+                log.innerText = `[${new Date().toLocaleTimeString()}] INBOUND TCP/TLS ${Math.floor(Math.random()*65535)} -> PORT 443 [ESTABLISHED]`;
+                logs.prepend(log);
+                if (logs.childNodes.length > 8) logs.removeChild(logs.lastChild);
             }
         }
     </script>
