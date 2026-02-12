@@ -2,164 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPECTER_NODE_v7_ELITE</title>
+    <title>PHANTOM_NODE_v8_INFINITE</title>
     <style>
-        :root { --neon: #00ff41; --danger: #ff003c; --warn: #ffcc00; --bg: #050505; }
+        :root { --neon: #00ff41; --danger: #ff003c; --bg: #050505; }
         
-        body { 
+        /* THE KEY FIX: Ensuring the body and main containers allow scrolling */
+        html, body { 
             background: var(--bg); color: var(--neon); 
             font-family: 'Courier New', monospace; 
-            margin: 0; display: flex; height: 100vh; overflow: hidden; 
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            display: flex; overflow: hidden; 
         }
 
-        /* CRT Scanline Effect */
-        body::after {
-            content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
-            background-size: 100% 3px; pointer-events: none; z-index: 1000;
-        }
-
-        /* Sidebar Stats */
+        /* Sidebar stays fixed */
         #sidebar {
-            width: 300px; border-right: 1px solid var(--neon);
-            padding: 20px; background: rgba(0, 15, 0, 0.9);
-            display: flex; flex-direction: column; gap: 15px; z-index: 10;
+            width: 320px; border-right: 1px solid var(--neon);
+            padding: 20px; background: rgba(0, 10, 0, 0.95);
+            display: flex; flex-direction: column; gap: 15px; z-index: 20;
         }
 
-        .stat-box { border: 1px solid rgba(0, 255, 65, 0.3); padding: 10px; font-size: 12px; }
-        .glitch { animation: glitch-text 2s infinite; font-weight: bold; color: white; }
+        /* THE MAIN SCROLL FIX */
+        #main-container { 
+            flex: 1; 
+            padding: 40px; 
+            overflow-y: auto; /* Allows you to scroll manually */
+            display: flex; 
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        #console { 
+            white-space: pre-wrap; 
+            font-size: 19px; 
+            line-height: 1.4; 
+            text-shadow: 0 0 5px var(--neon);
+            padding-bottom: 100px; /* Space at the bottom */
+        }
+
+        /* Visuals */
+        .stat-box { border: 1px solid rgba(0, 255, 65, 0.3); padding: 10px; font-size: 12px; background: rgba(0,20,0,0.5); }
+        #progress-fill { width: 0%; height: 10px; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.2s; }
         
-        /* Main Terminal */
-        #main { flex: 1; padding: 40px; position: relative; display: flex; flex-direction: column; }
-        #console { flex: 1; white-space: pre-wrap; font-size: 18px; line-height: 1.4; overflow: hidden; text-shadow: 0 0 5px var(--neon); }
-
-        /* Biometric Scanner */
-        #scanner {
-            width: 120px; height: 120px; border: 2px solid var(--neon);
-            position: relative; margin: 0 auto; overflow: hidden;
-        }
-        #scan-line {
-            width: 100%; height: 2px; background: var(--neon);
-            position: absolute; animation: scan-move 2s infinite linear;
-            box-shadow: 0 0 15px var(--neon);
-        }
-
-        /* Progress Bar */
-        #progress-container { width: 100%; height: 10px; background: #111; margin-top: 5px; border: 1px solid var(--neon); }
-        #progress-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.2s; }
-
-        /* Popups */
+        /* The Alerts */
         .popup {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            border: 10px double; padding: 50px; background: black; z-index: 2000;
-            text-align: center; font-size: 60px; font-family: 'Arial Black', sans-serif;
+            border: 10px double; padding: 60px; background: black; z-index: 3000;
+            text-align: center; font-size: 50px; font-family: 'Impact', sans-serif;
         }
-        .success { color: var(--neon); border-color: var(--neon); box-shadow: 0 0 100px var(--neon); }
+        .success { color: var(--neon); border-color: var(--neon); }
+        .intruder { color: var(--danger); border-color: var(--danger); animation: flash 0.2s infinite; }
 
-        @keyframes scan-move { 0% { top: 0; } 100% { top: 100%; } }
-        @keyframes glitch-text { 0% { opacity: 1; } 50% { opacity: 0.8; transform: skew(2deg); } 100% { opacity: 1; } }
+        @keyframes flash { 0% { background: black; } 50% { background: #300; } 100% { background: black; } }
+        
+        /* CRT Overlay */
+        .crt { position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+               background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+               background-size: 100% 3px; pointer-events: none; z-index: 1000; }
     </style>
 </head>
 <body onkeydown="handleInput(event)">
+    <div class="crt"></div>
 
     <div id="sidebar">
-        <div id="scanner"><div id="scan-line"></div></div>
-        <div style="text-align: center; font-size: 10px;">BIOMETRIC: <span style="color:white">MATCHED</span></div>
+        <div style="border: 2px solid var(--neon); padding: 10px; text-align: center;">
+            <div id="scan-line" style="height: 2px; background: var(--neon); animation: scan 2s infinite linear;"></div>
+            <span style="font-size: 10px;">FACIAL_RECOGNITION: <span style="color:white">OK</span></span>
+        </div>
         
         <div class="stat-box">
-            <div class="glitch">SATELLITE_LINK: ACTIVE</div>
+            <div style="color:white; font-weight:bold;">> NODE_INFO</div>
             IP: <span id="ip">0.0.0.0</span><br>
-            LOC: <span id="loc">ABU DHABI, UAE</span><br>
-            NET: <span id="isp">SCANNING...</span>
+            LOC: <span id="loc">ABU DHABI</span><br>
+            THREAT: <span style="color:red">MAXIMUM</span>
         </div>
 
         <div class="stat-box">
-            DECRYPTION_CORE:
-            <div id="progress-container"><div id="progress-fill"></div></div>
-            <div style="font-size: 10px; margin-top: 5px;">STATUS: <span id="perc">0</span>% COMPLETE</div>
+            DECRYPTION: <span id="perc">0</span>%
+            <div style="width:100%; background:#111; height:10px; margin-top:5px;">
+                <div id="progress-fill"></div>
+            </div>
         </div>
 
-        <div id="logs" style="font-size: 10px; color: rgba(0,255,65,0.5); overflow: hidden; flex: 1;">
-            > INITIALIZING...
-        </div>
+        <div id="logs" style="font-size: 10px; color: rgba(0,255,65,0.4); flex:1; overflow:hidden;"></div>
     </div>
 
-    <div id="main">
+    <div id="main-container">
         <div id="console"></div>
-    </div>
+        <div id="scroll-anchor"></div> </div>
 
     <div id="granted" class="popup success">ACCESS GRANTED</div>
+    <div id="intruder-alert" class="popup intruder">SIBLING DETECTED!<br>LOCKING SYSTEM</div>
 
-    <audio id="clickSound" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
+    <audio id="click" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
 
     <script>
-        // 1. DATA GATHERING
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('ip').innerText = data.ip;
-                document.getElementById('isp').innerText = data.org.split(' ')[0];
-                document.getElementById('loc').innerText = data.city + ", " + data.country;
-            });
+        // Real-time data
+        fetch('https://ipapi.co/json/').then(res => res.json()).then(data => {
+            document.getElementById('ip').innerText = data.ip;
+            document.getElementById('loc').innerText = data.city + ", UAE";
+        });
 
-        // 2. THE HACKER CODE BANK
         const codeBank = `
-/* SPECTER_NODE v7.0.1 - KERNEL BYPASS */
-#include <uae_crypto.h>
-#include <math_genius_40.h>
+/* SPECTER_NODE v8 - SCROLL_OPTIMIZED */
+#include <uae_core.h>
+#define IQ 180
 
-void execute_breach() {
-    if (calculate_iq() > 180) {
-        bypass_firewall("CENTRAL_HUB");
-        inject_logic_bomb(0x40);
-        log("40/40 MATH_CHECK PASSED.");
+void hack() {
+    System.Override("FIREWALL_01");
+    if (Math.Prodigy == 40) {
+        Satellite.Link("ABU_DHABI_MAIN");
+        Print("BYPASSING GATEWAY...");
     }
 }
 
-// ACCESSING LOCAL_NODE...
-// SNIFFING PACKETS FROM: DU_GATEWAY_04
-// RE-ROUTING POWER TO LANTERN_STABILIZERS
-// SIBLING_DETECTION: DISABLED
+// INFILTRATING ENCRYPTED SECTOR...
+// REPAIRING LANTERN_FRAME_04...
+// ANTI-RIP_PROTOCOL: ACTIVATED
+// SIBLING_BYPASS: SUCCESSFUL
 
-struct Phantom {
-    string user = "PRODIGY";
-    int score = 40;
-    void unlock_all() {
-        while(true) {
-            this->force_open_port(80);
-            this->mask_ip_address();
-        }
-    }
-};
-
-// DOWNLOADING ENCRYPTED_KEYS...
-// [####################] 100%
-// SYSTEM OVERRIDE IN 3... 2... 1...
+while(true) {
+    Packet.Sniff("ETISALAT_NODE");
+    Data.Decrypt(0x40);
+}
 `;
 
         let i = 0;
         let altCount = 0;
         let progress = 0;
+        const mainContainer = document.getElementById('main-container');
 
         function handleInput(e) {
-            // --- THE FIX: ENABLE BROWSER SHORTCUTS ---
-            // If Ctrl, Cmd, or F-Keys (F1-F12) are pressed, let them work!
-            if (e.ctrlKey || e.metaKey || e.key.startsWith('F')) {
-                return; // Browser handles this normally
-            }
+            // Whitelist Browser Controls
+            if (e.ctrlKey || e.metaKey || e.key.startsWith('F')) return;
 
-            // Block default behavior for everything else (like typing letters)
             e.preventDefault();
-            document.getElementById('clickSound').cloneNode(true).play();
+            document.getElementById('click').cloneNode(true).play();
 
-            // ESC to clear
-            if (e.key === "Escape") {
-                document.getElementById('granted').style.display = 'none';
+            // SISTER ALERT (Delete Key)
+            if (e.key === "Delete") {
+                document.getElementById('intruder-alert').style.display = 'block';
                 return;
             }
 
-            // Trigger: Alt Key (3 times)
+            // RESET (Escape Key)
+            if (e.key === "Escape") {
+                document.querySelectorAll('.popup').forEach(p => p.style.display = 'none');
+                return;
+            }
+
+            // SUCCESS (Alt x3)
             if (e.key === "Alt") {
                 altCount++;
                 if (altCount >= 3) {
@@ -169,30 +160,30 @@ struct Phantom {
                 return;
             }
 
-            // Typing Logic
-            let speed = (e.key === " ") ? 20 : 5; // Space is super-turbo
+            // TYPING LOGIC
+            let speed = (e.key === " ") ? 30 : 6;
             let chunk = codeBank.substring(i, i + speed);
             document.getElementById('console').innerHTML += chunk.replace(/\n/g, "<br>");
             i = (i + speed) % codeBank.length;
 
-            // Update UI elements
             updateUI();
-            window.scrollTo(0, document.body.scrollHeight);
+
+            // --- THE SCROLL FIX ---
+            // This forces the container to always show the bottom text
+            mainContainer.scrollTop = mainContainer.scrollHeight;
         }
 
         function updateUI() {
-            // Update Progress Bar
-            progress = (progress + 0.3) % 100;
+            progress = (progress + 0.5) % 100;
             document.getElementById('progress-fill').style.width = progress + "%";
             document.getElementById('perc').innerText = Math.floor(progress);
 
-            // Add fake logs
-            if (Math.random() > 0.9) {
-                const log = document.getElementById('logs');
+            if (Math.random() > 0.8) {
+                const logs = document.getElementById('logs');
                 const entry = document.createElement('div');
-                entry.innerText = `> INJECTING_PKT_${Math.floor(Math.random()*999)}...`;
-                log.prepend(entry);
-                if (log.childNodes.length > 15) log.removeChild(log.lastChild);
+                entry.innerText = `> INJECT_0x${Math.floor(Math.random()*9999).toString(16)}`;
+                logs.prepend(entry);
+                if (logs.childNodes.length > 20) logs.removeChild(logs.lastChild);
             }
         }
     </script>
