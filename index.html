@@ -2,140 +2,197 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PHANTOM_PROTOCOL_v5</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECTER_NODE_v7_ELITE</title>
     <style>
-        :root { --neon: #00ff41; --dim: rgba(0, 255, 65, 0.1); --warn: #ffcc00; --danger: #ff003c; }
-        body { background: #000; color: var(--neon); font-family: 'Courier New', monospace; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --neon: #00ff41; --danger: #ff003c; --warn: #ffcc00; --bg: #050505; }
         
-        /* CRT Effect */
-        body::after { content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05)); background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 100; }
+        body { 
+            background: var(--bg); color: var(--neon); 
+            font-family: 'Courier New', monospace; 
+            margin: 0; display: flex; height: 100vh; overflow: hidden; 
+        }
 
-        /* Left Panel: Real Stats */
-        #left-panel { width: 300px; border-right: 1px solid var(--neon); padding: 20px; font-size: 12px; background: rgba(0,10,0,0.5); z-index: 10; }
-        .stat-box { border: 1px solid var(--dim); padding: 10px; margin-bottom: 15px; background: rgba(0,255,65,0.05); }
-        .glitch { animation: glitch 1s linear infinite; }
-        @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.7; transform: skew(1deg); } 100% { opacity: 1; } }
+        /* CRT Scanline Effect */
+        body::after {
+            content: " "; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 3px; pointer-events: none; z-index: 1000;
+        }
 
+        /* Sidebar Stats */
+        #sidebar {
+            width: 300px; border-right: 1px solid var(--neon);
+            padding: 20px; background: rgba(0, 15, 0, 0.9);
+            display: flex; flex-direction: column; gap: 15px; z-index: 10;
+        }
+
+        .stat-box { border: 1px solid rgba(0, 255, 65, 0.3); padding: 10px; font-size: 12px; }
+        .glitch { animation: glitch-text 2s infinite; font-weight: bold; color: white; }
+        
         /* Main Terminal */
-        #terminal-area { flex: 1; padding: 40px; position: relative; display: flex; flex-direction: column; }
-        #console { flex: 1; white-space: pre-wrap; font-size: 18px; line-height: 1.2; overflow: hidden; }
+        #main { flex: 1; padding: 40px; position: relative; display: flex; flex-direction: column; }
+        #console { flex: 1; white-space: pre-wrap; font-size: 18px; line-height: 1.4; overflow: hidden; text-shadow: 0 0 5px var(--neon); }
+
+        /* Biometric Scanner */
+        #scanner {
+            width: 120px; height: 120px; border: 2px solid var(--neon);
+            position: relative; margin: 0 auto; overflow: hidden;
+        }
+        #scan-line {
+            width: 100%; height: 2px; background: var(--neon);
+            position: absolute; animation: scan-move 2s infinite linear;
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        /* Progress Bar */
+        #progress-container { width: 100%; height: 10px; background: #111; margin-top: 5px; border: 1px solid var(--neon); }
+        #progress-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 10px var(--neon); transition: width 0.2s; }
 
         /* Popups */
-        .alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 10px solid; padding: 60px; background: black; z-index: 1000; text-align: center; font-family: 'Arial Black'; font-size: 60px; }
-        .granted { color: var(--neon); border-color: var(--neon); box-shadow: 0 0 100px var(--neon); }
-        .launch { color: var(--warn); border-color: var(--warn); box-shadow: 0 0 100px var(--warn); }
+        .popup {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            border: 10px double; padding: 50px; background: black; z-index: 2000;
+            text-align: center; font-size: 60px; font-family: 'Arial Black', sans-serif;
+        }
+        .success { color: var(--neon); border-color: var(--neon); box-shadow: 0 0 100px var(--neon); }
 
-        /* "Camera" light */
-        #cam-light { width: 10px; height: 10px; background: red; border-radius: 50%; display: inline-block; animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.2; } }
+        @keyframes scan-move { 0% { top: 0; } 100% { top: 100%; } }
+        @keyframes glitch-text { 0% { opacity: 1; } 50% { opacity: 0.8; transform: skew(2deg); } 100% { opacity: 1; } }
     </style>
 </head>
-<body onkeydown="handleKey(event)">
+<body onkeydown="handleInput(event)">
 
-    <div id="left-panel">
-        <h2 class="glitch">SATELLITE_LINK</h2>
-        <div class="stat-box">
-            DEVICE: <span id="os">DETECTING...</span><br>
-            BATTERY: <span id="bat">99%</span><br>
-            RESOLUTION: <span id="res">1920x1080</span>
-        </div>
+    <div id="sidebar">
+        <div id="scanner"><div id="scan-line"></div></div>
+        <div style="text-align: center; font-size: 10px;">BIOMETRIC: <span style="color:white">MATCHED</span></div>
         
         <div class="stat-box">
-            TARGET_IP: <span id="ip" style="color: var(--danger)">0.0.0.0</span><br>
-            NETWORK: <span id="net">PROXIMITY_LOCAL</span><br>
-            REGION: <span id="city" style="color: var(--warn)">SCANNING...</span>
+            <div class="glitch">SATELLITE_LINK: ACTIVE</div>
+            IP: <span id="ip">0.0.0.0</span><br>
+            LOC: <span id="loc">ABU DHABI, UAE</span><br>
+            NET: <span id="isp">SCANNING...</span>
         </div>
 
         <div class="stat-box">
-            CAM_STATUS: <span id="cam-light"></span> ACTIVE<br>
-            P_LEVEL: 40/40 MATH_PRODIGY<br>
-            LANTERN_SENSORS: DAMAGED
+            DECRYPTION_CORE:
+            <div id="progress-container"><div id="progress-fill"></div></div>
+            <div style="font-size: 10px; margin-top: 5px;">STATUS: <span id="perc">0</span>% COMPLETE</div>
         </div>
 
-        <div style="font-size: 10px; opacity: 0.5;">
-            > BYPASSING FIREWALL...<br>
-            > SNIFFING PACKETS...<br>
-            > RE-ROUTING TO UAE_SERVER_1
+        <div id="logs" style="font-size: 10px; color: rgba(0,255,65,0.5); overflow: hidden; flex: 1;">
+            > INITIALIZING...
         </div>
     </div>
 
-    <div id="terminal-area">
+    <div id="main">
         <div id="console"></div>
     </div>
 
-    <div id="granted" class="alert granted">GATEWAY BYPASSED</div>
-    <div id="launch" class="alert launch">REVENGE_LANTERN.exe<br>LAUNCHED</div>
+    <div id="granted" class="popup success">ACCESS GRANTED</div>
 
-    <audio id="beep" src="https://www.soundjay.com/communication/digital-beeps-05.mp3"></audio>
+    <audio id="clickSound" src="https://www.soundjay.com/communication/typewriter-key-1.mp3"></audio>
 
     <script>
-        // 1. GET REAL DATA (The "Scary" Part)
-        document.getElementById('os').innerText = navigator.platform;
-        document.getElementById('res').innerText = window.screen.width + "x" + window.screen.height;
-        
-        // Fetch Real IP and Location
+        // 1. DATA GATHERING
         fetch('https://ipapi.co/json/')
             .then(res => res.json())
             .then(data => {
                 document.getElementById('ip').innerText = data.ip;
-                document.getElementById('city').innerText = data.city + ", " + data.country;
-                document.getElementById('net').innerText = data.org; // This shows their ISP/Internet provider
+                document.getElementById('isp').innerText = data.org.split(' ')[0];
+                document.getElementById('loc').innerText = data.city + ", " + data.country;
             });
 
-        // Battery Tracking
-        navigator.getBattery().then(bat => {
-            document.getElementById('bat').innerText = (bat.level * 100) + "%";
-        });
+        // 2. THE HACKER CODE BANK
+        const codeBank = `
+/* SPECTER_NODE v7.0.1 - KERNEL BYPASS */
+#include <uae_crypto.h>
+#include <math_genius_40.h>
 
-        // 2. THE HACKER TYPER LOGIC
-        const code = `
-# PHANTOM_PROTOCOL INITIATED
-# SOURCE: ABU_DHABI_HIDDEN_NODE
-# LOADING MATH_MODULES (STABILITY: 40/40)
+void execute_breach() {
+    if (calculate_iq() > 180) {
+        bypass_firewall("CENTRAL_HUB");
+        inject_logic_bomb(0x40);
+        log("40/40 MATH_CHECK PASSED.");
+    }
+}
 
-def master_infiltrate():
-    connection = satellite.link("TARGET_ZONE")
-    if connection.is_secured:
-        connection.force_open(port=8080)
-        print(">> BYPASSING ROUTER SETTINGS")
-        print(">> HARVESTING LOCAL_SSID_DATA")
-    
-    // INJECTING LANTERN_REPAIR_SCRIPT...
-    // [####################] 100%
-    
-    // ACCESSING SIBLING_PC_01...
-    // STATUS: VULNERABLE
-    // ACTION: PREVENT_LANTERN_RIPPING = TRUE
+// ACCESSING LOCAL_NODE...
+// SNIFFING PACKETS FROM: DU_GATEWAY_04
+// RE-ROUTING POWER TO LANTERN_STABILIZERS
+// SIBLING_DETECTION: DISABLED
 
-while True:
-    packet = listen_to_network()
-    if "40/40" in packet:
-        deploy_hacker_mode()
+struct Phantom {
+    string user = "PRODIGY";
+    int score = 40;
+    void unlock_all() {
+        while(true) {
+            this->force_open_port(80);
+            this->mask_ip_address();
+        }
+    }
+};
+
+// DOWNLOADING ENCRYPTED_KEYS...
+// [####################] 100%
+// SYSTEM OVERRIDE IN 3... 2... 1...
 `;
 
         let i = 0;
-        let altCount = 0, shiftCount = 0;
+        let altCount = 0;
+        let progress = 0;
 
-        function handleKey(e) {
+        function handleInput(e) {
+            // --- THE FIX: ENABLE BROWSER SHORTCUTS ---
+            // If Ctrl, Cmd, or F-Keys (F1-F12) are pressed, let them work!
+            if (e.ctrlKey || e.metaKey || e.key.startsWith('F')) {
+                return; // Browser handles this normally
+            }
+
+            // Block default behavior for everything else (like typing letters)
             e.preventDefault();
-            document.getElementById('beep').cloneNode(true).play();
+            document.getElementById('clickSound').cloneNode(true).play();
 
+            // ESC to clear
             if (e.key === "Escape") {
-                document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
+                document.getElementById('granted').style.display = 'none';
                 return;
             }
 
+            // Trigger: Alt Key (3 times)
             if (e.key === "Alt") {
                 altCount++;
-                if (altCount >= 3) document.getElementById('granted').style.display = 'block';
-            } else if (e.key === "Shift") {
-                shiftCount++;
-                if (shiftCount >= 3) document.getElementById('launch').style.display = 'block';
-            } else {
-                let chunk = code.substring(i, i + 5);
-                document.getElementById('console').innerHTML += chunk.replace(/\n/g, "<br>");
-                i = (i + 5) % code.length;
-                window.scrollTo(0, document.body.scrollHeight);
+                if (altCount >= 3) {
+                    document.getElementById('granted').style.display = 'block';
+                    altCount = 0;
+                }
+                return;
+            }
+
+            // Typing Logic
+            let speed = (e.key === " ") ? 20 : 5; // Space is super-turbo
+            let chunk = codeBank.substring(i, i + speed);
+            document.getElementById('console').innerHTML += chunk.replace(/\n/g, "<br>");
+            i = (i + speed) % codeBank.length;
+
+            // Update UI elements
+            updateUI();
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function updateUI() {
+            // Update Progress Bar
+            progress = (progress + 0.3) % 100;
+            document.getElementById('progress-fill').style.width = progress + "%";
+            document.getElementById('perc').innerText = Math.floor(progress);
+
+            // Add fake logs
+            if (Math.random() > 0.9) {
+                const log = document.getElementById('logs');
+                const entry = document.createElement('div');
+                entry.innerText = `> INJECTING_PKT_${Math.floor(Math.random()*999)}...`;
+                log.prepend(entry);
+                if (log.childNodes.length > 15) log.removeChild(log.lastChild);
             }
         }
     </script>
