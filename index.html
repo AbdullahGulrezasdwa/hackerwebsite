@@ -1,173 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCHANGEL // Tactical Operations Suite v5.0</title>
+    <meta charset="UTF-8">
+    <title>ARCHANGEL // Tactical Operations Suite v5.1</title>
+    <style>
+        :root {
+            --bg: #0a0c10; --panel: #11151c; --border: #232a35;
+            --text: #c9d1d9; --muted: #6e7681; --accent: #3b82f6;
+            --danger: #ef4444; --success: #22c55e;
+        }
 
-<style>
-:root{
-    --bg:#0b0f14;
-    --panel:#121821;
-    --border:#1f2630;
-    --text:#c9d1d9;
-    --muted:#6e7681;
-    --accent:#3b82f6;
-    --danger:#ef4444;
-    --success:#22c55e;
-    --warning:#f59e0b;
-}
+        * { box-sizing: border-box; scrollbar-width: none; }
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); 
+            font-family: 'JetBrains Mono', 'Consolas', monospace; 
+            height: 100vh; display: grid; grid-template-columns: 320px 1fr;
+        }
 
-*{box-sizing:border-box}
-body{
-    margin:0;
-    background:var(--bg);
-    color:var(--text);
-    font-family:Consolas,monospace;
-    height:100vh;
-    display:grid;
-    grid-template-columns:320px 1fr;
-}
+        /* SIDEBAR Glass Effect */
+        #sidebar { 
+            background: var(--panel); border-right: 1px solid var(--border); 
+            padding: 25px; display: flex; flex-direction: column; gap: 20px; 
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        }
 
-/* SIDEBAR */
-#sidebar{
-    background:var(--panel);
-    border-right:1px solid var(--border);
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-}
+        .module { 
+            border: 1px solid var(--border); padding: 15px; background: #0d1117; 
+            border-radius: 4px; position: relative; overflow: hidden;
+        }
 
-.module{
-    border:1px solid var(--border);
-    padding:12px;
-    background:#0e141b;
-}
+        .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+        .metric { font-size: 16px; margin-top: 8px; font-weight: bold; color: #fff; }
 
-.label{
-    font-size:10px;
-    color:var(--muted);
-    text-transform:uppercase;
-    letter-spacing:1px;
-}
+        .progress { height: 4px; background: #1a212a; margin-top: 10px; border-radius: 2px; overflow: hidden; }
+        .progress div { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
-.metric{
-    font-size:14px;
-    margin-top:5px;
-}
+        /* MAIN WORKSPACE */
+        #main { display: grid; grid-template-rows: 45px 1fr 220px; }
+        #topbar { 
+            background: var(--panel); border-bottom: 1px solid var(--border); 
+            display: flex; align-items: center; padding: 0 25px; font-size: 11px; 
+            justify-content: space-between; letter-spacing: 1px;
+        }
 
-.progress{
-    height:6px;
-    background:#0b1118;
-    margin-top:6px;
-    border-radius:4px;
-    overflow:hidden;
-}
-.progress div{
-    height:100%;
-    background:var(--accent);
-    width:40%;
-    transition:.3s;
-}
+        #console { 
+            padding: 30px; overflow-y: auto; background: #05070a; 
+            display: flex; flex-direction: column; gap: 4px;
+        }
 
-/* MAIN */
-#main{
-    display:grid;
-    grid-template-rows:40px 1fr 200px;
-}
+        .line { font-size: 14px; line-height: 1.6; animation: fadeIn 0.2s ease-in; }
+        .prompt { color: var(--accent); font-weight: bold; margin-right: 10px; }
+        
+        #cmdInput { 
+            background: none; border: none; outline: none; color: #fff; 
+            font-family: inherit; font-size: 14px; width: 80%;
+        }
 
-#topbar{
-    background:var(--panel);
-    border-bottom:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    padding:0 20px;
-    font-size:12px;
-    justify-content:space-between;
-}
+        #bottom { display: grid; grid-template-columns: 1fr 400px; border-top: 1px solid var(--border); background: #080b10; }
+        #memory, #packets { padding: 15px; font-size: 11px; font-family: monospace; line-height: 1.4; color: #4e5660; }
+        #packets { color: var(--success); border-left: 1px solid var(--border); }
 
-#console{
-    padding:20px;
-    overflow-y:auto;
-    background:#05090d;
-}
-
-.line{margin-bottom:4px}
-.prompt{color:var(--accent)}
-
-#input-line{
-    display:flex;
-}
-
-#cmdInput{
-    flex:1;
-    background:none;
-    border:none;
-    outline:none;
-    color:var(--text);
-    font-family:inherit;
-    font-size:14px;
-}
-
-#bottom{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    border-top:1px solid var(--border);
-}
-
-#memory,#packets{
-    padding:12px;
-    overflow:hidden;
-    font-size:11px;
-    border-right:1px solid var(--border);
-}
-
-#packets{border-right:none;color:var(--success)}
-
-.blink{
-    animation:blink 1s infinite;
-}
-@keyframes blink{
-    0%,50%,100%{opacity:1}
-    25%,75%{opacity:0}
-}
-</style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
 </head>
-
 <body>
 
 <div id="sidebar">
-
-    <div>
-        <h3 style="margin:0;color:white">ARCHANGEL</h3>
-        <small style="color:var(--accent)">Tactical Operations Suite</small>
+    <div style="padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+        <h3 style="margin:0; letter-spacing: 2px;">ARCHANGEL <span style="color:var(--accent)">v5.1</span></h3>
+        <div style="font-size: 10px; color: var(--muted); margin-top: 5px;">TACTICAL OPERATIONS SUITE</div>
     </div>
 
     <div class="module">
-        <div class="label">Target Node</div>
-        <div class="metric" id="ip">Resolving...</div>
+        <div class="label">Primary Node</div>
+        <div class="metric" id="ip" style="font-size: 13px; color: var(--accent);">Resolving...</div>
     </div>
 
     <div class="module">
-        <div class="label">CPU Usage</div>
+        <div class="label">Neural Core Load</div>
         <div class="progress"><div id="cpuBar"></div></div>
-        <div class="metric" id="cpuText">--%</div>
+        <div class="metric" id="cpuText">0%</div>
     </div>
 
     <div class="module">
-        <div class="label">Memory Allocation</div>
+        <div class="label">Memory Buffer</div>
         <div class="progress"><div id="ramBar" style="background:var(--success)"></div></div>
-        <div class="metric" id="ramText">--%</div>
+        <div class="metric" id="ramText">0%</div>
     </div>
-
 </div>
 
 <div id="main">
-
     <div id="topbar">
-        <div>USER: PRODIGY_40</div>
-        <div style="color:var(--danger)">● LIVE SESSION</div>
+        <div><span style="color:var(--muted)">OPERATOR:</span> PRODIGY_40</div>
+        <div style="color:var(--danger)"><span class="blink">●</span> ENCRYPTED SESSION ACTIVE</div>
     </div>
 
     <div id="console"></div>
@@ -176,7 +101,6 @@ body{
         <div id="memory"></div>
         <div id="packets"></div>
     </div>
-
 </div>
 
 <script>
@@ -184,115 +108,92 @@ const consoleEl = document.getElementById("console");
 const memoryEl = document.getElementById("memory");
 const packetEl = document.getElementById("packets");
 
-function print(text){
+// NEW: Smooth Async Printer
+async function print(text, delay = 20) {
     const div = document.createElement("div");
-    div.className="line";
-    div.innerHTML=text;
+    div.className = "line";
     consoleEl.appendChild(div);
-    consoleEl.scrollTop = consoleEl.scrollHeight;
+    
+    for (let char of text) {
+        div.innerHTML += char;
+        await new Promise(r => setTimeout(r, delay));
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
 }
 
-function prompt(){
+function prompt() {
     const line = document.createElement("div");
-    line.className="line";
-    line.innerHTML=`<span class="prompt">ARCHANGEL></span> <input id="cmdInput" autofocus />`;
+    line.className = "line";
+    line.innerHTML = `<span class="prompt">ARCHANGEL></span><input id="cmdInput" spellcheck="false" autocomplete="off" />`;
     consoleEl.appendChild(line);
-    consoleEl.scrollTop = consoleEl.scrollHeight;
-
+    
     const input = document.getElementById("cmdInput");
     input.focus();
 
-    input.addEventListener("keydown",function(e){
-        if(e.key==="Enter"){
-            const value=input.value.trim();
-            line.innerHTML=`<span class="prompt">ARCHANGEL></span> ${value}`;
-            processCommand(value);
+    input.addEventListener("keydown", async function(e) {
+        if (e.key === "Enter") {
+            const val = input.value;
+            line.innerHTML = `<span class="prompt">ARCHANGEL></span> ${val}`;
+            await processCommand(val.trim().toLowerCase());
             prompt();
         }
     });
 }
 
-function processCommand(cmd){
-    switch(cmd.toLowerCase()){
+async function processCommand(cmd) {
+    if (!cmd) return;
+    
+    switch(cmd) {
         case "help":
-            print("Available commands: scan, trace, memdump, packets, clear");
+            await print("> Available modules: scan, trace, decrypt, clear, status");
             break;
-
         case "scan":
-            print("Initializing deep system scan...");
-            setTimeout(()=>print("No critical vulnerabilities found."),1000);
+            await print("[*] Initiating deep-layer heuristic scan...");
+            await new Promise(r => setTimeout(r, 800));
+            await print("[+] Result: All systems nominal. 40/40 integrity.");
             break;
-
-        case "trace":
-            print("Tracing route through secure backbone...");
-            setTimeout(()=>print("Route optimized via UAE proxy cluster."),1000);
+        case "decrypt":
+            await print("[!] Initializing brute-force on remote buffer...");
+            await print("[####------] 40% Complete...");
+            await new Promise(r => setTimeout(r, 1000));
+            await print("[SUCCESS] Partition mounted at /mnt/vault");
             break;
-
-        case "memdump":
-            generateMemory(true);
-            break;
-
-        case "packets":
-            print("Packet capture engaged.");
-            break;
-
         case "clear":
-            consoleEl.innerHTML="";
+            consoleEl.innerHTML = "";
             break;
-
         default:
-            print("Command not recognized.");
+            await print(`[-] Error: Command '${cmd}' not recognized in this kernel.`);
     }
 }
 
-function generateMemory(force=false){
-    if(Math.random()>0.7 || force){
-        let hex="0x"+Math.floor(Math.random()*1e8).toString(16).toUpperCase()+" ";
-        for(let i=0;i<10;i++){
-            hex+=Math.floor(Math.random()*256).toString(16).padStart(2,"0")+" ";
-        }
-        memoryEl.innerHTML=hex+"<br>"+memoryEl.innerHTML;
-        if(memoryEl.innerHTML.length>2000) memoryEl.innerHTML="";
-    }
+// Stats Generation (Faster & More Dynamic)
+function updateStats() {
+    const cpu = Math.floor(Math.random() * 15) + 30; // Realer jitter
+    const ram = Math.floor(Math.random() * 5) + 60;
+
+    document.getElementById("cpuBar").style.width = cpu + "%";
+    document.getElementById("cpuText").innerText = cpu + "%";
+    document.getElementById("ramBar").style.width = ram + "%";
+    document.getElementById("ramText").innerText = ram + "%";
+
+    // Memory Stream
+    let hex = "0x" + Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8, '0') + " ";
+    for(let i=0; i<6; i++) hex += Math.floor(Math.random()*256).toString(16).padStart(2,"0") + " ";
+    memoryEl.innerHTML = hex + "<br>" + memoryEl.innerHTML.slice(0, 500);
+
+    // Packet Stream
+    const p = `INBOUND [${Math.floor(Math.random()*65535)}] -> 192.168.1.40 [TLS1.3]`;
+    packetEl.innerHTML = p + "<br>" + packetEl.innerHTML.slice(0, 500);
 }
 
-function generatePackets(){
-    if(Math.random()>0.6){
-        const line=`TCP:${Math.floor(Math.random()*65535)} TLS1.3 ACK LEN=${Math.floor(Math.random()*1500)}`;
-        packetEl.innerHTML=line+"<br>"+packetEl.innerHTML;
-        if(packetEl.innerHTML.length>2000) packetEl.innerHTML="";
-    }
-}
-
-function updateMetrics(){
-    const cpu=Math.floor(Math.random()*100);
-    const ram=Math.floor(Math.random()*100);
-
-    document.getElementById("cpuBar").style.width=cpu+"%";
-    document.getElementById("cpuText").innerText=cpu+"%";
-
-    document.getElementById("ramBar").style.width=ram+"%";
-    document.getElementById("ramText").innerText=ram+"%";
-}
-
-setInterval(()=>{
-    generateMemory();
-    generatePackets();
-    updateMetrics();
-},1000);
+setInterval(updateStats, 800);
 
 fetch("https://ipapi.co/json/")
-.then(r=>r.json())
-.then(d=>{
-    document.getElementById("ip").innerText=d.ip+" // "+d.city+", "+d.country_name;
-})
-.catch(()=>{
-    document.getElementById("ip").innerText="127.0.0.1 // Localhost";
-});
+    .then(r => r.json())
+    .then(d => { document.getElementById("ip").innerText = d.ip + " // " + d.city.toUpperCase(); })
+    .catch(() => { document.getElementById("ip").innerText = "LOCAL_NODE // 127.0.0.1"; });
 
-print("ARCHANGEL Tactical Interface Initialized.");
-prompt();
+print("ARCHANGEL CORE v5.1 SECURE LINK ESTABLISHED...", 10).then(prompt);
 </script>
-
 </body>
 </html>
