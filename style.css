@@ -1,1 +1,130 @@
+/* --- 1. CORE VARIABLES & THEMES --- */
+:root {
+  --main-color: #22c55e;     /* Matrix Green */
+  --glow-color: rgba(34, 197, 94, 0.5);
+  --bg-color: #000000;
+}
 
+.theme-cyberpunk {
+  --main-color: #f472b6;     /* Pink */
+  --glow-color: rgba(244, 114, 182, 0.5);
+}
+
+.theme-synth {
+  --main-color: #22d3ee;     /* Cyan */
+  --glow-color: rgba(34, 211, 238, 0.5);
+}
+
+/* --- 2. THE MONITOR LOOK --- */
+body {
+  background-color: var(--bg-color);
+  color: var(--main-color);
+  transition: all 0.3s ease;
+  text-shadow: 0 0 5px var(--glow-color), 0 0 10px var(--glow-color);
+}
+
+/* CRT Vignette (Dark edges for that curved tube look) */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: radial-gradient(circle, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 100%),
+              rgba(18, 16, 16, 0);
+  z-index: 150;
+  pointer-events: none;
+}
+
+/* --- 3. THE SCANLINES (The "Hacker" Texture) --- */
+.crt-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  /* Horizontal scanlines */
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.1) 50%
+  ), 
+  /* Vertical RGB sub-pixel simulation */
+  linear-gradient(90deg, 
+    rgba(255, 0, 0, 0.03), 
+    rgba(0, 255, 0, 0.01), 
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 3px 100%;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* --- 4. ANIMATIONS --- */
+
+/* Subtle screen flicker */
+@keyframes flicker {
+  0% { opacity: 0.98; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.99; }
+  15% { opacity: 0.92; }
+  20% { opacity: 0.99; }
+  100% { opacity: 1; }
+}
+
+.animate-flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Glitch Effect for Access Modals */
+@keyframes glitch {
+  0% { clip-path: inset(40% 0 61% 0); transform: skew(0.5deg); }
+  20% { clip-path: inset(92% 0 1% 0); transform: skew(0.1deg); }
+  40% { clip-path: inset(43% 0 1% 0); transform: skew(0.5deg); }
+  60% { clip-path: inset(25% 0 58% 0); transform: skew(0.1deg); }
+  80% { clip-path: inset(54% 0 7% 0); transform: skew(0.5deg); }
+  100% { clip-path: inset(58% 0 43% 0); transform: skew(0.1deg); }
+}
+
+.animate-glitch {
+  animation: glitch 1s linear infinite alternate-reverse;
+}
+
+/* Horizontal Scanning Line (Moving down the screen) */
+.scan-line {
+  width: 100%;
+  height: 100px;
+  z-index: 110;
+  background: linear-gradient(0deg, 
+    rgba(0, 0, 0, 0) 0%, 
+    var(--glow-color) 50%, 
+    rgba(0, 0, 0, 0) 100%);
+  opacity: 0.1;
+  position: fixed;
+  bottom: 100%;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  0% { bottom: 100%; }
+  100% { bottom: -100px; }
+}
+
+/* --- 5. UI ELEMENTS --- */
+
+/* Terminal Scrolling */
+#terminal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--main-color) transparent;
+}
+
+/* Retro Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+::-webkit-scrollbar-thumb { 
+  background: var(--main-color); 
+  box-shadow: 0 0 10px var(--glow-color);
+}
+
+/* BBP-Style (Big, Bold, Protected) Buttons/Windows */
+.module-window {
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--main-color);
+  box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 10px var(--glow-color);
+}
