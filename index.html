@@ -2,186 +2,199 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TERMINAL_OS_v9.0_ULTIMATE</title>
+    <title>SINGULARITY_OS_v_FINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap');
-        
-        :root {
-            --neon: #22c55e;
-            --neon-bg: rgba(34, 197, 94, 0.1);
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;700&display=swap');
+        :root { --neon: #00ff41; --danger: #ff003c; --cyan: #00d4ff; }
         body { 
-            background: #000; 
-            color: var(--neon); 
-            font-family: 'Fira Code', monospace;
-            height: 100vh; width: 100vw;
-            overflow: hidden;
-            text-shadow: 0 0 8px var(--neon);
+            background: #000; color: var(--neon); font-family: 'Fira Code', monospace;
+            height: 100vh; width: 100vw; overflow: hidden; perspective: 1000px;
         }
 
-        /* CRT Glass Texture */
-        .crt-monitor::after {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none;
-            z-index: 1000;
+        /* --- THE ULTIMATE CRT LOOK --- */
+        .crt::after {
+            content: " "; display: block; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+                        linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,0,255,0.03));
+            background-size: 100% 2px, 3px 100%; z-index: 1000; pointer-events: none;
         }
 
-        /* Floating Windows */
+        /* --- 3D PARALLAX SHELL --- */
+        #shell-container {
+            height: 100vh; padding: 10vw; overflow-y: scroll;
+            transform: rotateX(5deg); transform-style: preserve-3d;
+            scrollbar-width: none;
+        }
+        #shell-container::-webkit-scrollbar { display: none; }
+
+        /* --- HUD ELEMENTS --- */
         .window {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.85);
-            border: 1px solid var(--neon);
-            box-shadow: 0 0 20px var(--neon-bg);
-            backdrop-filter: blur(5px);
-            z-index: 10;
+            position: absolute; background: rgba(0, 10, 0, 0.9);
+            border: 1px solid var(--neon); box-shadow: 0 0 30px rgba(0,255,65,0.1);
+            backdrop-filter: blur(15px); z-index: 50; transition: border-color 0.5s;
         }
-
         .window-header {
-            background: var(--neon);
-            color: black;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 8px;
-            display: flex;
-            justify-content: space-between;
+            background: var(--neon); color: #000; font-size: 10px;
+            padding: 2px 10px; font-weight: 900; cursor: move; display: flex; justify-content: space-between;
         }
 
-        #terminal-content {
-            height: 100vh;
-            padding: 50px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
+        /* --- GLOBAL WAR MAP --- */
+        .strike-point {
+            position: absolute; width: 4px; height: 4px; background: var(--danger);
+            border-radius: 50%; box-shadow: 0 0 10px var(--danger);
+            animation: pulse 1.5s infinite;
         }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
 
-        /* Animations */
-        @keyframes scan {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(100vh); }
-        }
-        .scanner-line {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 5px;
-            background: var(--neon);
-            opacity: 0.1;
-            animation: scan 8s linear infinite;
-            pointer-events: none;
-        }
+        /* --- SYSTEM MELTDOWN --- */
+        .meltdown { animation: shake 0.1s infinite, hue-shift 0.5s infinite; color: var(--danger) !important; }
+        @keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(0); } }
+        @keyframes hue-shift { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
 
-        .glitch-text { animation: pulse 0.1s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+        #binary-sidebar {
+            position: fixed; left: 0; top: 0; width: 40px; height: 100%;
+            font-size: 10px; opacity: 0.2; overflow: hidden; word-break: break-all;
+        }
     </style>
 </head>
-<body class="crt-monitor">
+<body class="crt">
 
-    <div class="scanner-line"></div>
+    <div id="binary-sidebar"></div>
 
-    <div id="terminal-content">
-        <div id="output" class="text-lg leading-relaxed mb-20"></div>
-        <span class="inline-block w-3 h-6 bg-[var(--neon)] animate-pulse"></span>
-    </div>
-
-    <div class="window w-80 h-64 top-10 right-10 hidden md:block">
-        <div class="window-header"><span>GEOSPATIAL_TRACKER</span><span>LIVE</span></div>
-        <div class="p-4 opacity-70">
+    <div class="window w-96 h-56 top-10 right-10" id="map-win">
+        <div class="window-header"><span>Satellite_Infiltration</span><span>LIVE_FEED</span></div>
+        <div class="p-2 relative bg-black/50 h-full">
             
-            <div id="coords" class="text-[10px] mt-2">LAT: 0.0000 | LNG: 0.0000</div>
+            <div id="map-canvas" class="w-full h-full relative overflow-hidden">
+                </div>
         </div>
     </div>
 
-    <div class="window w-64 h-40 bottom-10 left-10 hidden lg:block">
-        <div class="window-header"><span>SYS_LOG_VIRTUAL</span><span>0x88</span></div>
-        <div id="logs" class="p-2 text-[9px] overflow-hidden opacity-60"></div>
+    <div class="window w-48 bottom-10 right-10" id="auth-win">
+        <div class="window-header"><span>User_Identity</span><span>Root</span></div>
+        <div class="p-4 text-center">
+            <div class="w-20 h-20 border-2 border-[var(--neon)] mx-auto mb-2 flex items-center justify-center relative overflow-hidden">
+                <div class="absolute w-full h-1 bg-[var(--neon)] animate-bounce shadow-[0_0_10px_var(--neon)]"></div>
+                <span class="text-[8px] opacity-40">FACE_ID</span>
+            </div>
+            <div id="id-status" class="text-[10px] tracking-widest">AUTHORIZED</div>
+        </div>
     </div>
 
-    <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black/80 z-[2000] hidden">
-        <div class="border-8 border-[var(--neon)] p-20 text-7xl font-black bg-black scale-110 animate-bounce">
-            ACCESS GRANTED
-        </div>
+    <div id="shell-container">
+        <div id="output" class="text-3xl font-black italic tracking-tighter leading-none uppercase"></div>
+        <span id="cursor" class="inline-block w-8 h-10 bg-[var(--neon)] shadow-[0_0_20px_var(--neon)] align-middle"></span>
+    </div>
+
+    <div id="meltdown-overlay" class="fixed inset-0 z-[2000] hidden bg-red-900/20 backdrop-invert flex items-center justify-center">
+        <div class="text-9xl font-black text-white animate-ping">CRITICAL FAILURE</div>
     </div>
 
     <script>
         const output = document.getElementById('output');
-        const logs = document.getElementById('logs');
-        const modal = document.getElementById('modal');
-        const coords = document.getElementById('coords');
+        const shell = document.getElementById('shell-container');
+        const binary = document.getElementById('binary-sidebar');
+        const map = document.getElementById('map-canvas');
+        const synth = window.speechSynthesis;
 
-        const hackerCode = `
-// INITIALIZING DEEP PACKET INSPECTION...
-// TARGET: CLOUD_SERVER_B9
-#include <linux/security.h>
+        const code = `
+>>> INITIATING SINGULARITY BYPASS
+>>> TARGET: GLOBAL_FINANCIAL_GRID
+>>> PROTOCOL: 0x000_ZERO_DAY
 
-void infiltrate() {
-    char *token = "ACCESS_KEY_099123";
-    bypass_encryption_v3(token);
-    for(int i=0; i<512; i++) {
-        inject_node(i);
-        sync_uplink(0x7F);
+void overwrite_world() {
+    auto cores = system.get_all_clusters();
+    for(auto& node : cores) {
+        node.inject(DNA_VIRUS_v4);
+        node.redirect_assets("127.0.0.1");
     }
+    speak("World Control Established");
 }
 
-/* DATA STREAM ENCRYPTED - SHA-512 */
-// ROUTING THROUGH TOR NODES...
-// 127.0.0.1 -> 184.22.10.12 -> [HIDDEN]
+// BYPASSING KERNEL RING-0... [OK]
+// HIJACKING SATELLITE COMMS... [OK]
+// REPLACING REALITY... [IN_PROGRESS]
         `;
 
-        let index = 0;
-        let enterCount = 0;
+        let i = 0;
 
-        // 1. TYPING LOGIC
+        // 1. AUDIO SYNTH (Binaural Beats)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playHackerClick() {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(Math.random() * 100 + 50, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.1);
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function speak(t) {
+            const u = new SpeechSynthesisUtterance(t);
+            u.rate = 0.6; u.pitch = 0.1; synth.speak(u);
+        }
+
+        // 2. THE ENGINE
         window.addEventListener('keydown', (e) => {
-            if (e.key !== 'F12' && e.key !== 'F5') e.preventDefault();
+            if(!['F12','F5'].includes(e.key)) e.preventDefault();
+            
+            playHackerClick();
+            
+            // Type 8 chars for speed
+            output.innerHTML += code.slice(i, i+8).replace(/\n/g, '<br>');
+            i = (i + 8) % code.length;
+            shell.scrollTop = shell.scrollHeight;
 
-            // Typing Speed: 6 chars per stroke
-            const chunk = hackerCode.slice(index, index + 6);
-            output.innerHTML += chunk.replace(/\n/g, '<br>');
-            index += 6;
-            if (index >= hackerCode.length) index = 0;
-
-            // Access Granted Trigger
-            if (e.key === 'Enter') {
-                enterCount++;
-                if (enterCount >= 3) {
-                    modal.classList.remove('hidden');
-                    setTimeout(() => { modal.classList.add('hidden'); enterCount = 0; }, 2000);
-                }
+            // Meltdown Mode (Trigger: Hold Backspace)
+            if(e.key === 'Backspace') {
+                document.body.classList.add('meltdown');
+                document.getElementById('meltdown-overlay').classList.remove('hidden');
+                speak("System Critical. Meltdown Imminent.");
+                setTimeout(() => {
+                    document.body.classList.remove('meltdown');
+                    document.getElementById('meltdown-overlay').classList.add('hidden');
+                }, 2000);
             }
 
-            window.scrollTo(0, document.body.scrollHeight);
+            // Success (Trigger: Enter)
+            if(e.key === 'Enter') {
+                speak("Access Granted. Singularity Achieved.");
+                output.innerHTML += `<div class="bg-[var(--neon)] text-black p-4 my-10">GOD_MODE_ENABLED</div>`;
+            }
         });
 
-        // 2. BACKGROUND SYSTEM LOGS (Hollywood Style)
+        // 3. BACKGROUND BINARY RAIN
         setInterval(() => {
-            const ips = ["192.168.0.1", "10.0.0.54", "45.22.11.0", "127.0.0.1"];
-            const status = ["CONNECTING", "BYPASSING", "REJECTED", "ENCRYPTED"];
-            const line = `> [${ips[Math.floor(Math.random()*ips.length)]}] : ${status[Math.floor(Math.random()*status.length)]}<br>`;
-            logs.innerHTML = line + logs.innerHTML;
-            if (logs.innerHTML.length > 500) logs.innerHTML = "";
-            
-            // Randomize Coords
-            coords.innerText = `LAT: ${(Math.random()*180-90).toFixed(4)} | LNG: ${(Math.random()*360-180).toFixed(4)}`;
+            binary.innerHTML = Math.round(Math.random()) + "<br>" + binary.innerHTML;
+            if(binary.innerHTML.length > 2000) binary.innerHTML = "";
+        }, 50);
+
+        // 4. MAP STRIKE POINTS
+        setInterval(() => {
+            const dot = document.createElement('div');
+            dot.className = 'strike-point';
+            dot.style.left = Math.random() * 100 + "%";
+            dot.style.top = Math.random() * 100 + "%";
+            map.appendChild(dot);
+            setTimeout(() => dot.remove(), 1500);
         }, 800);
 
-        // 3. THEME SWAP (Press Alt to go Cyberpunk Red)
-        window.addEventListener('keyup', (e) => {
-            if (e.key === 'Alt') {
-                const root = document.documentElement;
-                if (getComputedStyle(root).getPropertyValue('--neon').trim() === '#22c55e') {
-                    root.style.setProperty('--neon', '#ef4444');
-                    root.style.setProperty('--neon-bg', 'rgba(239, 68, 68, 0.1)');
-                } else {
-                    root.style.setProperty('--neon', '#22c55e');
-                    root.style.setProperty('--neon-bg', 'rgba(34, 197, 94, 0.1)');
-                }
-            }
+        // 5. DRAGGABLE WINDOWS
+        document.querySelectorAll('.window').forEach(w => {
+            const h = w.querySelector('.window-header');
+            h.onmousedown = (e) => {
+                let x = e.clientX - w.offsetLeft, y = e.clientY - w.offsetTop;
+                document.onmousemove = (e) => {
+                    w.style.left = (e.pageX - x) + 'px';
+                    w.style.top = (e.pageY - y) + 'px';
+                };
+                document.onmouseup = () => document.onmousemove = null;
+            };
         });
+
+        window.onload = () => speak("Singularity OS Online. Waiting for input.");
     </script>
 </body>
 </html>
