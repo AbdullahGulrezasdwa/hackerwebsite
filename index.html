@@ -1,92 +1,212 @@
-<style>
-    /* Add a subtle scanline effect to the console for realism */
-    #console::before {
-        content: " ";
-        display: block;
-        position: absolute;
-        top: 0; left: 0; bottom: 0; right: 0;
-        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
-                    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-        z-index: 2;
-        background-size: 100% 3px, 3px 100%;
-        pointer-events: none;
-    }
-    
-    .error-line { color: var(--danger); font-style: italic; opacity: 0.8; }
-    .searching { color: var(--warning); font-size: 12px; }
-</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTX Browser | Velocity & Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00f2ea;
+            --secondary: #ff0050;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
 
-<script>
-const consoleEl = document.getElementById("console");
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            overflow-x: hidden;
+        }
 
-// SLOWER TYPING: Changed delay from 20 to 50 for a "Mechanical" feel
-async function print(text, delay = 50, isError = false) {
-    const div = document.createElement("div");
-    div.className = isError ? "line error-line" : "line";
-    consoleEl.appendChild(div);
-    
-    for (let char of text) {
-        div.innerHTML += char;
-        await new Promise(r => setTimeout(r, delay));
-        consoleEl.scrollTop = consoleEl.scrollHeight;
-    }
-}
+        /* Animated Background */
+        .background-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 15% 50%, rgba(0, 242, 234, 0.15), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(255, 0, 80, 0.15), transparent 25%);
+            z-index: -1;
+            animation: pulse 10s infinite alternate;
+        }
 
-async function processCommand(cmd) {
-    if (!cmd) return;
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            100% { transform: scale(1.1); opacity: 0.8; }
+        }
 
-    // Show "Searching" feedback before the result
-    const searchDiv = document.createElement("div");
-    searchDiv.className = "line searching";
-    searchDiv.innerHTML = `> Querying internal database for '${cmd}'...`;
-    consoleEl.appendChild(searchDiv);
-    
-    // 1.5 second "Simulation Delay" to make it feel like a real search
-    await new Promise(r => setTimeout(r, 1500));
-    searchDiv.remove();
-    
-    switch(cmd) {
-        case "help":
-            await print("[LISTING ACCESSIBLE MODULES]");
-            await print("1. SCAN - Heuristic System Audit");
-            await print("2. TRACE - Network Route Mapping");
-            await print("3. CLEAR - Purge Terminal Buffer");
-            await print("4. SYSTEM - View Local Node Specs");
-            break;
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
 
-        case "scan":
-            await print("[!] Initializing deep-layer audit...", 100);
-            await new Promise(r => setTimeout(r, 1000));
-            await print("[+] Result: System Integrity 100% (40/40 confirmed).");
-            break;
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; }
+        .logo span { color: var(--primary); }
 
-        case "system":
-            await print(`[ID] ARCH-PRODIGY-09`);
-            await print(`[OS] Archangel-Core v5.2 (Unix-like)`);
-            await print(`[COORDS] ${document.getElementById("ip").innerText}`);
-            break;
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px;
+        }
 
-        case "clear":
-            consoleEl.innerHTML = "";
-            break;
+        h1 {
+            font-size: 5rem;
+            line-height: 1;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
 
-        // THE "BETTER" ERROR HANDLING
-        default:
-            const errorTypes = [
-                `[-] UNIDENTIFIED_COMMAND: '${cmd}' does not exist in the /bin directory.`,
-                `[!] ACCESS_DENIED: User 'PRODIGY_40' does not have permission for '${cmd}'.`,
-                `[-] KERNEL_ERROR: Instruction pointer overflow at '${cmd}'.`,
-                `[?] '${cmd}' is not recognized as an internal or external command.`
-            ];
-            // Randomly picks an "Error" style to make it look smarter
-            const randomError = errorTypes[Math.floor(Math.random() * errorTypes.length)];
-            await print(randomError, 40, true);
-            
-            // Add to a secret security log in the console
-            console.warn(`Intrusion Alert: Unrecognized command '${cmd}' logged to /var/log/security.`);
-    }
-}
+        h1 span {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-// Ensure the prompt function is called after the first print
-print("ARCHANGEL // DEEP DATA LINK ESTABLISHED", 30).then(prompt);
-</script>
+        p.subtitle {
+            font-size: 1.25rem;
+            color: #888;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        /* The Button */
+        .btn {
+            background: white;
+            color: black;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0, 242, 234, 0.6);
+            background: var(--primary);
+        }
+
+        /* Browser Mockup */
+        .browser-mockup {
+            margin-top: 80px;
+            width: 80%;
+            max-width: 900px;
+            height: 500px;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
+            position: relative;
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.5s ease;
+        }
+
+        .browser-mockup:hover {
+            transform: perspective(1000px) rotateX(0deg);
+        }
+
+        .browser-header {
+            height: 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 8px;
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
+        .bar { 
+            height: 10px; width: 40%; background: var(--border); 
+            border-radius: 5px; margin-left: 20px; 
+        }
+
+        .browser-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #333;
+            font-weight: 900;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent);
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 100px 50px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .card:hover { border-color: var(--primary); }
+        .card h3 { color: var(--primary); margin-top: 0; }
+        .card p { color: #aaa; line-height: 1.6; }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-gradient"></div>
+
+    <nav>
+        <div class="logo">GTX <span>BROWSER</span></div>
+        <a href="https://github.com/AbdullahGulrezasdwa/GTX-BROWSER" style="color:white; text-decoration:none; opacity:0.7;">GitHub</a>
+    </nav>
+
+    <div class="hero">
+        <h1>Browse <span>Faster.</span><br>Think Smarter.</h1>
+        <p class="subtitle">Experience the next evolution of web browsing. Built on the Chromium engine, enhanced with AI, and optimized for maximum velocity.</p>
+        
+        <a href="https://github.com/AbdullahGulrezasdwa/GTX-BROWSER/archive/refs/tags/Download.zip" class="btn">
+            Download GTX Browser
+        </a>
+        <div style="margin-top: 15px; font-size: 0.8rem; color: #555;">Windows 10 / 11 • 64-bit</div>
+
+        <div class="browser-mockup">
+            <div class="browser-header">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+                <div class="bar"></div>
+            </div>
+            <div class="browser-body">
+                GTX ENGINE ACTIVE
+            </div>
+        </div>
+    </div>
+
+    <div class="features
