@@ -2,140 +2,186 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TERMINAL_OS_v7.0</title>
+    <title>TERMINAL_OS_v9.0_ULTIMATE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&display=swap');
         
-        body { 
-            background-color: #000; 
-            color: #22c55e; 
-            font-family: 'Fira Code', monospace;
-            margin: 0;
-            overflow: hidden;
+        :root {
+            --neon: #22c55e;
+            --neon-bg: rgba(34, 197, 94, 0.1);
         }
 
-        /* CRT Effects */
-        .crt::before {
+        body { 
+            background: #000; 
+            color: var(--neon); 
+            font-family: 'Fira Code', monospace;
+            height: 100vh; width: 100vw;
+            overflow: hidden;
+            text-shadow: 0 0 8px var(--neon);
+        }
+
+        /* CRT Glass Texture */
+        .crt-monitor::after {
             content: " ";
             display: block;
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Floating Windows */
+        .window {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--neon);
+            box-shadow: 0 0 20px var(--neon-bg);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .window-header {
+            background: var(--neon);
+            color: black;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #terminal-content {
+            height: 100vh;
+            padding: 50px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Animations */
+        @keyframes scan {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(100vh); }
+        }
+        .scanner-line {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: var(--neon);
+            opacity: 0.1;
+            animation: scan 8s linear infinite;
             pointer-events: none;
         }
 
-        #terminal {
-            height: 100vh;
-            padding: 40px;
-            overflow-y: auto;
-            text-shadow: 0 0 5px #22c55e;
-            position: relative;
-            z-index: 1;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 20px;
-            background: #22c55e;
-            animation: blink 0.8s infinite;
-            vertical-align: middle;
-        }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* Access Granted Pop-up */
-        #access-modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            border: 4px solid #22c55e;
-            background: #000;
-            padding: 50px;
-            z-index: 100;
-            font-size: 4rem;
-            font-weight: bold;
-            box-shadow: 0 0 50px #22c55e;
-        }
+        .glitch-text { animation: pulse 0.1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
     </style>
 </head>
-<body class="crt">
+<body class="crt-monitor">
 
-    <div id="access-modal">ACCESS GRANTED</div>
+    <div class="scanner-line"></div>
 
-    <div id="terminal">
-        <div id="output-text"></div>
-        <span class="cursor"></span>
+    <div id="terminal-content">
+        <div id="output" class="text-lg leading-relaxed mb-20"></div>
+        <span class="inline-block w-3 h-6 bg-[var(--neon)] animate-pulse"></span>
+    </div>
+
+    <div class="window w-80 h-64 top-10 right-10 hidden md:block">
+        <div class="window-header"><span>GEOSPATIAL_TRACKER</span><span>LIVE</span></div>
+        <div class="p-4 opacity-70">
+            
+            <div id="coords" class="text-[10px] mt-2">LAT: 0.0000 | LNG: 0.0000</div>
+        </div>
+    </div>
+
+    <div class="window w-64 h-40 bottom-10 left-10 hidden lg:block">
+        <div class="window-header"><span>SYS_LOG_VIRTUAL</span><span>0x88</span></div>
+        <div id="logs" class="p-2 text-[9px] overflow-hidden opacity-60"></div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black/80 z-[2000] hidden">
+        <div class="border-8 border-[var(--neon)] p-20 text-7xl font-black bg-black scale-110 animate-bounce">
+            ACCESS GRANTED
+        </div>
     </div>
 
     <script>
-        // 1. DATA SNIPPET
-        const code = `
-/* SYSTEM OVERRIDE INITIATED */
-#include <linux/kernel.h>
-#include <net/tcp.h>
+        const output = document.getElementById('output');
+        const logs = document.getElementById('logs');
+        const modal = document.getElementById('modal');
+        const coords = document.getElementById('coords');
 
-int main() {
-    printf("Bypassing Firewall...");
-    while(1) {
-        connect_to_proxy("192.168.1.1");
-        if (access == GRANTED) {
-            decrypt_vault();
-            return 0;
-        }
+        const hackerCode = `
+// INITIALIZING DEEP PACKET INSPECTION...
+// TARGET: CLOUD_SERVER_B9
+#include <linux/security.h>
+
+void infiltrate() {
+    char *token = "ACCESS_KEY_099123";
+    bypass_encryption_v3(token);
+    for(int i=0; i<512; i++) {
+        inject_node(i);
+        sync_uplink(0x7F);
     }
 }
 
-// DOWNLOADING CONFIDENTIAL_DATA.ARC...
-// RE-ROUTING THROUGH SATELLITE UPLINK...
-// ENCRYPTION KEY: 0xDEADBEEF
+/* DATA STREAM ENCRYPTED - SHA-512 */
+// ROUTING THROUGH TOR NODES...
+// 127.0.0.1 -> 184.22.10.12 -> [HIDDEN]
         `;
 
-        const output = document.getElementById('output-text');
-        const modal = document.getElementById('access-modal');
         let index = 0;
-        let enterKeys = 0;
+        let enterCount = 0;
 
-        // 2. THE TYPING ENGINE
+        // 1. TYPING LOGIC
         window.addEventListener('keydown', (e) => {
-            // Stop things like "Space" scrolling the page
-            e.preventDefault();
+            if (e.key !== 'F12' && e.key !== 'F5') e.preventDefault();
 
-            // Check for Access Granted (Hit Enter 3 times)
+            // Typing Speed: 6 chars per stroke
+            const chunk = hackerCode.slice(index, index + 6);
+            output.innerHTML += chunk.replace(/\n/g, '<br>');
+            index += 6;
+            if (index >= hackerCode.length) index = 0;
+
+            // Access Granted Trigger
             if (e.key === 'Enter') {
-                enterKeys++;
-                if (enterKeys >= 3) {
-                    modal.style.display = 'block';
-                    setTimeout(() => { 
-                        modal.style.display = 'none';
-                        enterKeys = 0;
-                    }, 2000);
+                enterCount++;
+                if (enterCount >= 3) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => { modal.classList.add('hidden'); enterCount = 0; }, 2000);
                 }
             }
 
-            // Type 4 characters per key press
-            const slice = code.slice(index, index + 4);
-            output.innerHTML += slice.replace(/\n/g, '<br>');
-            index += 4;
-
-            if (index >= code.length) index = 0;
-
-            // 3. AUTO-SCROLL
             window.scrollTo(0, document.body.scrollHeight);
-            // Backup scroll for some browsers
-            const terminal = document.getElementById('terminal');
-            terminal.scrollTop = terminal.scrollHeight;
         });
 
-        // Click once to focus
-        window.onload = () => {
-            console.log("Ready. Start typing!");
-        };
+        // 2. BACKGROUND SYSTEM LOGS (Hollywood Style)
+        setInterval(() => {
+            const ips = ["192.168.0.1", "10.0.0.54", "45.22.11.0", "127.0.0.1"];
+            const status = ["CONNECTING", "BYPASSING", "REJECTED", "ENCRYPTED"];
+            const line = `> [${ips[Math.floor(Math.random()*ips.length)]}] : ${status[Math.floor(Math.random()*status.length)]}<br>`;
+            logs.innerHTML = line + logs.innerHTML;
+            if (logs.innerHTML.length > 500) logs.innerHTML = "";
+            
+            // Randomize Coords
+            coords.innerText = `LAT: ${(Math.random()*180-90).toFixed(4)} | LNG: ${(Math.random()*360-180).toFixed(4)}`;
+        }, 800);
+
+        // 3. THEME SWAP (Press Alt to go Cyberpunk Red)
+        window.addEventListener('keyup', (e) => {
+            if (e.key === 'Alt') {
+                const root = document.documentElement;
+                if (getComputedStyle(root).getPropertyValue('--neon').trim() === '#22c55e') {
+                    root.style.setProperty('--neon', '#ef4444');
+                    root.style.setProperty('--neon-bg', 'rgba(239, 68, 68, 0.1)');
+                } else {
+                    root.style.setProperty('--neon', '#22c55e');
+                    root.style.setProperty('--neon-bg', 'rgba(34, 197, 94, 0.1)');
+                }
+            }
+        });
     </script>
 </body>
 </html>
