@@ -1,212 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTX Browser | Velocity & Intelligence</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <title>TERMINAL_OS_v7.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #00f2ea;
-            --secondary: #ff0050;
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+        body { font-family: 'Fira Code', monospace; }
+        
+        /* CRT Scanline Effect */
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: white;
-            overflow-x: hidden;
+        /* Custom Scrollbar for that Retro Look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #166534; border-radius: 2px; }
+
+        /* The Glow */
+        .terminal-glow {
+            text-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
         }
 
-        /* Animated Background */
-        .background-gradient {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 15% 50%, rgba(0, 242, 234, 0.15), transparent 25%),
-                        radial-gradient(circle at 85% 30%, rgba(255, 0, 80, 0.15), transparent 25%);
-            z-index: -1;
-            animation: pulse 10s infinite alternate;
+        /* Glitch Animation for Modals */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.5; }
-            100% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        /* Navigation */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 50px;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; }
-        .logo span { color: var(--primary); }
-
-        /* Hero Section */
-        .hero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 100px 20px;
-        }
-
-        h1 {
-            font-size: 5rem;
-            line-height: 1;
-            margin-bottom: 20px;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -2px;
-        }
-
-        h1 span {
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        p.subtitle {
-            font-size: 1.25rem;
-            color: #888;
-            max-width: 600px;
-            margin-bottom: 40px;
-        }
-
-        /* The Button */
-        .btn {
-            background: white;
-            color: black;
-            padding: 16px 40px;
-            border-radius: 50px;
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 40px rgba(0, 242, 234, 0.6);
-            background: var(--primary);
-        }
-
-        /* Browser Mockup */
-        .browser-mockup {
-            margin-top: 80px;
-            width: 80%;
-            max-width: 900px;
-            height: 500px;
-            background: rgba(20, 20, 20, 0.8);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.8);
-            position: relative;
-            backdrop-filter: blur(20px);
-            display: flex;
-            flex-direction: column;
-            transform: perspective(1000px) rotateX(5deg);
-            transition: transform 0.5s ease;
-        }
-
-        .browser-mockup:hover {
-            transform: perspective(1000px) rotateX(0deg);
-        }
-
-        .browser-header {
-            height: 40px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 8px;
-        }
-
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .red { background: #ff5f56; }
-        .yellow { background: #ffbd2e; }
-        .green { background: #27c93f; }
-        .bar { 
-            height: 10px; width: 40%; background: var(--border); 
-            border-radius: 5px; margin-left: 20px; 
-        }
-
-        .browser-body {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: #333;
-            font-weight: 900;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent);
-        }
-
-        /* Features Grid */
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 100px 50px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: var(--glass);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            transition: 0.3s;
-        }
-
-        .card:hover { border-color: var(--primary); }
-        .card h3 { color: var(--primary); margin-top: 0; }
-        .card p { color: #aaa; line-height: 1.6; }
-
+        .animate-glitch { animation: glitch 0.2s infinite; }
     </style>
 </head>
-<body>
 
-    <div class="background-gradient"></div>
+<body class="bg-black text-green-500 overflow-hidden h-screen w-screen selection:bg-green-900 selection:text-white">
 
-    <nav>
-        <div class="logo">GTX <span>BROWSER</span></div>
-        <a href="https://github.com/AbdullahGulrezasdwa/GTX-BROWSER" style="color:white; text-decoration:none; opacity:0.7;">GitHub</a>
-    </nav>
+    <div class="fixed inset-0 z-[100] crt-overlay opacity-30 pointer-events-none"></div>
+    <div class="fixed inset-0 z-[101] bg-black opacity-[0.02] pointer-events-none animate-pulse"></div>
 
-    <div class="hero">
-        <h1>Browse <span>Faster.</span><br>Think Smarter.</h1>
-        <p class="subtitle">Experience the next evolution of web browsing. Built on the Chromium engine, enhanced with AI, and optimized for maximum velocity.</p>
-        
-        <a href="https://github.com/AbdullahGulrezasdwa/GTX-BROWSER/archive/refs/tags/Download.zip" class="btn">
-            Download GTX Browser
-        </a>
-        <div style="margin-top: 15px; font-size: 0.8rem; color: #555;">Windows 10 / 11 • 64-bit</div>
+    <div class="fixed top-4 right-4 z-50 flex gap-2 text-[10px] opacity-50 hover:opacity-100 transition-opacity">
+        <button onclick="setTheme('matrix')" class="border border-green-800 px-2 py-1 hover:bg-green-900">MATRIX</button>
+        <button onclick="setTheme('cyberpunk')" class="border border-pink-800 px-2 py-1 hover:bg-pink-900 text-pink-500">CYBER</button>
+        <button onclick="setTheme('synth')" class="border border-purple-800 px-2 py-1 hover:bg-purple-900 text-purple-400">SYNTH</button>
+    </div>
 
-        <div class="browser-mockup">
-            <div class="browser-header">
-                <div class="dot red"></div>
-                <div class="dot yellow"></div>
-                <div class="dot green"></div>
-                <div class="bar"></div>
+    <main id="terminal" class="relative h-full w-full p-6 md:p-12 overflow-y-auto overflow-x-hidden terminal-glow">
+        <div id="output" class="whitespace-pre-wrap break-all text-sm md:text-lg leading-relaxed">
+            <span class="opacity-70">// SYSTEM BOOT SEQUENCE INITIATED...</span><br>
+            <span class="opacity-70">// ENCRYPTED LINK ESTABLISHED. START TYPING TO BYPASS.</span><br><br>
+        </div>
+        <span id="cursor" class="inline-block w-2.5 h-5 bg-green-500 animate-pulse align-middle"></span>
+    </main>
+
+    <div class="absolute bottom-10 right-10 w-64 h-48 border border-green-900/50 bg-black/80 backdrop-blur-sm p-2 hidden md:block">
+        <div class="flex justify-between text-[10px] mb-1 border-b border-green-900/50 pb-1">
+            <span>SATELLITE_UPLINK</span>
+            <span class="text-red-500 animate-pulse">LIVE</span>
+        </div>
+        <div id="map-container" class="w-full h-32 opacity-60">
+            
+        </div>
+        <div class="text-[9px] mt-1 text-green-700">TRACING IP: 192.168.1.XXX...</div>
+    </div>
+
+    <div class="absolute top-10 left-10 w-48 border border-green-900/50 bg-black/80 p-3 hidden lg:block">
+        <div class="text-[10px] mb-2 italic">DECRYPTING PACKETS...</div>
+        <div class="w-full bg-green-900/30 h-1.5 mb-1">
+            <div id="decrypt-bar" class="bg-green-500 h-full w-0 transition-all duration-500"></div>
+        </div>
+        <div id="decrypt-percent" class="text-right text-[10px]">0%</div>
+    </div>
+
+    <div id="modal-granted" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-green-950/20 backdrop-blur-md">
+        <div class="border-4 border-green-500 p-8 md:p-16 bg-black text-center animate-glitch shadow-[0_0_50px_rgba(34,197,94,0.4)]">
+            <h1 class="text-5xl md:text-8xl font-black mb-4">ACCESS GRANTED</h1>
+            <p class="tracking-[0.5em] text-sm">SECURITY BYPASS COMPLETE</p>
+        </div>
+    </div>
+
+    <div id="modal-denied" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-red-950/20 backdrop-blur-md">
+        <div class="border-4 border-red-600 p-8 md:p-16 bg-black text-center animate-glitch shadow-[0_0_50px_rgba(220,38,38,0.4)] text-red-600">
+            <h1 class="text-5xl md:text-8xl font-black mb-4">ACCESS DENIED</h1>
+            <p class="tracking-[0.5em] text-sm text-red-500">THREAT DETECTED - LOCKDOWN INITIATED</p>
+        </div>
+    </div>
+
+    <div id="modal-download" class="hidden fixed inset-0 z-[200] flex items-center justify-center bg-black">
+        <div class="w-2/3 max-w-2xl">
+            <div class="text-2xl mb-4 italic">DOWNLOADING CONFIDENTIAL_DATA.ARC...</div>
+            <div class="w-full border-2 border-green-500 h-8 p-1">
+                <div id="download-bar" class="h-full bg-green-500 w-0"></div>
             </div>
-            <div class="browser-body">
-                GTX ENGINE ACTIVE
+            <div class="flex justify-between mt-2 font-bold">
+                <span id="download-status">0%</span>
+                <span>ESTIMATED TIME: 4.2s</span>
             </div>
         </div>
     </div>
 
-    <div class="features
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+    <audio id="snd-denied" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3" preload="auto"></audio>
+    <audio id="snd-ambient" src="https://assets.mixkit.co/active_storage/sfx/1084/1084-preview.mp3" loop preload="auto"></audio>
+
+</body>
+</html>
